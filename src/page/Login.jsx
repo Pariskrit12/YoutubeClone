@@ -1,27 +1,29 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const navigate=useNavigate();
-
+  const navigate = useNavigate();
+  const { login } = useAuth();
   const handleOnSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("/api/v1/users/login", {
-        email,
-        password,
-      });
-      navigate('/')
-      console.log("Login success", response.data.data);
+      await login(email, password);
+      navigate("/");
+      // window.location.reload()
+      console.log("Login successfull");
     } catch (error) {
       console.log("Login failed", error);
     }
   };
   return (
-    <form onSubmit={handleOnSubmit} className="w-[30rem] mx-auto flex flex-col p-[2rem] items-center  rounded-xl mt-[2rem] h-[24rem] border-[1px] border-gray-500">
+    <form
+      onSubmit={handleOnSubmit}
+      className="w-[30rem] mx-auto flex flex-col p-[2rem] items-center  rounded-xl mt-[2rem] h-[24rem] border-[1px] border-gray-500"
+    >
       <p className="text-2xl font-bold">Login</p>
       <div className="mb-5">
         <label
@@ -34,7 +36,7 @@ export default function Login() {
           type="email"
           id="email"
           value={email}
-          onChange={(e)=>setEmail(e.target.value)}
+          onChange={(e) => setEmail(e.target.value)}
           className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-[20rem] p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           placeholder="name@gmail.com"
           required
@@ -51,7 +53,7 @@ export default function Login() {
           type="password"
           id="password"
           value={password}
-          onChange={(e)=>setPassword(e.target.value)}
+          onChange={(e) => setPassword(e.target.value)}
           className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-[20rem] p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           required
         />

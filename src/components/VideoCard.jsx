@@ -1,25 +1,52 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCircleUser, faCircleCheck } from "@fortawesome/free-solid-svg-icons";
-export default function VideoCard() {
+import { faCircleCheck } from "@fortawesome/free-solid-svg-icons";
+export default function VideoCard({ video }) {
+  const createdAt = new Date(video.createdAt);
+  const now = new Date();
+  const differenceInMilliseconds = now - createdAt;
+
+  let timeAgo;
+  if (differenceInMilliseconds < 60 * 1000) {
+    timeAgo = `${Math.floor(differenceInMilliseconds / 1000)} seconds ago`;
+  } else if (differenceInMilliseconds < 60 * 60 * 1000) {
+    timeAgo = `${Math.floor(
+      differenceInMilliseconds / (1000 * 60)
+    )} minutes ago`;
+  } else if (differenceInMilliseconds < 24 * 60 * 60 * 1000) {
+    timeAgo = `${Math.floor(
+      differenceInMilliseconds / (1000 * 60 * 60)
+    )} hours ago`;
+  } else {
+    timeAgo = `${Math.floor(
+      differenceInMilliseconds / (1000 * 60 * 60 * 24)
+    )} days ago`;
+  }
+
   return (
-    <div className="xl:w-[20rem] w-[15rem] p-[1rem] ml-[2rem]  mt-[2rem] border-1 rounded-xl border-gray-600">
+    <div className="xl:w-[20rem] md:w-[14rem] w-[15rem] p-[1rem] ml-[2rem]  mt-[2rem]  rounded-xl border-gray-600">
       <div className="font-semibold">
         <img
-          className="rounded-xl "
-          src="https://www.hollywoodreporter.com/wp-content/uploads/2024/11/FotoJet-2024-11-20T171710.080.jpg?w=1920&h=1080&crop=1"
+          className="rounded-xl mb-0.5 h-[13rem] w-[25rem] border-[1px] "
+          src={video.thumbnail}
         />
-        <div className="flex items-center gap-1">
-          <FontAwesomeIcon className="text-[2.5rem]" icon={faCircleUser} />
-          <p>Sidemen 100$ vs 100000$ Road Trip</p>
-        </div>
-        <div className="flex items-center px-[2.7rem] gap-[5px]">
-          <p>Sidemen</p>
-          <FontAwesomeIcon icon={faCircleCheck} />
-        </div>
-        <div className="flex pl-[2.7rem] gap-[1rem]">
-          <p>1M views</p>
-          <p>1hr Ago</p>
+        <div className="flex items-center gap-[0.5rem]">
+          <div>
+            <img className="w-10 h-10 rounded-full" src={video.channel.avatar} alt="Rounded avatar"></img>
+          </div>
+          <div className="flex flex-col  mr-[40px]">
+            <div className=" gap-1">
+              <p>{video.title}</p>
+            </div>
+            <div className="flex gap-[1rem] items-center">
+              <p>{video.channel.channelName}</p>
+              <FontAwesomeIcon icon={faCircleCheck} />
+            </div>
+            <div className="flex  gap-[1rem]">
+              <p>{video.views} views</p>
+              <p>{timeAgo}</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

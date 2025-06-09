@@ -16,13 +16,15 @@ export const AuthProvider = ({ children }) => {
           withCredentials: true,
         });
         setUser(response.data.data);
+        
       } catch (error) {
         setUser(null);
       } finally {
         setLoading(false);
       }
-    };
-  }, []);
+    }
+    isLoggedIn();
+  }, [user]);
 
   const login = async (email, password) => {
     const response = await axios.post(
@@ -37,6 +39,7 @@ export const AuthProvider = ({ children }) => {
     await axios.post("/api/v1/users/logout", {}, { withCredentials: true });
     setUser(null);
   };
+
   return (
     <AuthContext.Provider value={{ user, login, logout, loading }}>
       {children}

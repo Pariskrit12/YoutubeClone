@@ -1,6 +1,6 @@
 import React from 'react';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faHouse, faClockRotateLeft, faThumbsUp, faVideo, faBell, faGear } from '@fortawesome/free-solid-svg-icons';
+import { faHouse, faClockRotateLeft, faThumbsUp, faVideo, faBell, faGear, faFire } from '@fortawesome/free-solid-svg-icons';
 
 const SidebarItem = ({ icon, label, active = false }) => (
   <div
@@ -22,6 +22,8 @@ export default function Sidebar() {
       <SidebarItem icon={faVideo} label="Videos" />
       <SidebarItem icon={faBell} label="Subs" />
       <SidebarItem icon={faGear} label="Settings" />
+      <SidebarItem icon={faFire} label="Popular" />
+       <SidebarItem icon={faFire} label="Trending" />
     </div>
   );
 }

@@ -1,10 +1,15 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import VideoCard from "../components/VideoCard";
-import SavedVideoList from "../components/SavedVideoList";
+import SavedVideoList from "../components/UploadVideo";
+import { Link } from "react-router-dom";
+import axios from "axios";
 
 export default function ProfilePage() {
+  const [videos,setVideos]=useState([]);
   const { user } = useAuth();
+  const channelId = user?.channel._id;
+
   let formattedDate = "";
   if (user?.createdAt) {
     const date = new Date(user.createdAt);
@@ -14,7 +19,18 @@ export default function ProfilePage() {
       })} ${date.getFullYear()}`;
     }
   }
-  const videos = user?.savedVideos || [];
+ useEffect(()=>{
+  const fetchSavedVideos=async()=>{
+    try {
+      const response=await axios.get('/api/v1/videos/get-saved-video');
+      console.log(response.data.data);
+      setVideos(response.data.data)
+    } catch (error) {
+      console.log("Error in fetching saved videos",error);
+    }
+  }
+  fetchSavedVideos();
+ },[])
 
   return (
     <>
@@ -29,6 +45,13 @@ export default function ProfilePage() {
             <p className="text-3xl font-extrabold">{user?.name}</p>
             <p className=" text-[20px]">{user?.email}</p>
             <p className="text-[20px]">Joined At: {formattedDate}</p>
+            {user?.channel && (
+              <Link to={`/channel/${channelId}`}>
+                <p className="text-[15px] text-blue-700 underline cursor-pointer">
+                  View Channel
+                </p>
+              </Link>
+            )}
           </div>
         </div>
         <div className="border-b-[1px] text-xl font-semibold border-gray-500 mt-[10px] mb-[1rem]">
@@ -36,7 +59,7 @@ export default function ProfilePage() {
         </div>
         <div className=" xl:ml-[1rem] grid grid-cols-2 md:grid-cols-3">
           {videos.map((video) => (
-            <SavedVideoList video={video} key={video._id} />
+            <VideoCard video={video} key={video._id} />
           ))}
         </div>
       </div>

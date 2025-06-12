@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function SavedVideoList({ video }) {
+export default function UploadVideo({ video }) {
   const createdAt = new Date(video.createdAt);
   const now = new Date();
   const differenceInMilliseconds = now - createdAt;

@@ -8,7 +8,7 @@ import axios from "axios";
 export default function ProfilePage() {
   const [videos,setVideos]=useState([]);
   const { user } = useAuth();
-  const channelId = user?.channel._id;
+ 
 
   let formattedDate = "";
   if (user?.createdAt) {
@@ -23,7 +23,7 @@ export default function ProfilePage() {
   const fetchSavedVideos=async()=>{
     try {
       const response=await axios.get('/api/v1/videos/get-saved-video');
-      console.log(response.data.data);
+      // console.log(response.data.data);
       setVideos(response.data.data)
     } catch (error) {
       console.log("Error in fetching saved videos",error);
@@ -35,7 +35,7 @@ export default function ProfilePage() {
   return (
     <>
       <div className=" w-full py-[3rem]">
-        <div className="-200 px-[1rem] h-[10rem] flex items-center gap-[1rem]">
+        <div className=" px-[1rem] h-[10rem] flex items-center gap-[1rem]">
           <img
             className="w-[10rem] h-[10rem] rounded-full"
             src={user?.avatar}
@@ -45,7 +45,7 @@ export default function ProfilePage() {
             <p className="text-3xl font-extrabold">{user?.name}</p>
             <p className=" text-[20px]">{user?.email}</p>
             <p className="text-[20px]">Joined At: {formattedDate}</p>
-            {user?.channel && (
+            {user?.channel?._id && (
               <Link to={`/channel/${channelId}`}>
                 <p className="text-[15px] text-blue-700 underline cursor-pointer">
                   View Channel

@@ -19,6 +19,9 @@ export default function Login() {
       console.log("Login failed", error);
     }
   };
+  const goToRegisterPage=()=>{
+    navigate('/register')
+  }
   return (
     <form
       onSubmit={handleOnSubmit}
@@ -61,8 +64,8 @@ export default function Login() {
       <div className="flex items-start mb-5">
         <label
           htmlFor="remember"
-          className="ms-2 text-sm font-medium text-gray-900 dark:text-blue-700"
-        >
+          className="ms-2 text-sm font-medium text-gray-900 dark:text-blue-700 underline"
+        onClick={goToRegisterPage}>
           Do you have an account? Register
         </label>
       </div>

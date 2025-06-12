@@ -5,6 +5,10 @@ import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
 import Login from "./page/Login";
 import ProfilePage from "./page/ProfilePage";
+import CreateChannel from "./page/CreateChannel";
+import Channel from "./page/Channel";
+import Register from "./page/Register";
+import WatchHistoryPage from "./page/WatchHistoryPage";
 
 export default function App() {
 
@@ -19,6 +23,10 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/profile/:userId" element={<ProfilePage/>}/>
+        <Route path="/create-channel-page" element={<CreateChannel/>}/>
+        <Route path="/channel/:channelId" element={<Channel/>}/>
+        <Route path="/register" element={<Register/>}/>
+        <Route path="/history" element={<WatchHistoryPage/>}/>
       </Routes>
     </div>
     </>

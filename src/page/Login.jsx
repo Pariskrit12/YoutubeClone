@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { toast } from "react-toastify";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -14,9 +15,9 @@ export default function Login() {
       await login(email, password);
       navigate("/");
       // window.location.reload()
-      console.log("Login successfull");
+      toast.success("Login Sucessfull")
     } catch (error) {
-      console.log("Login failed", error);
+     toast.success("Login Failed")
     }
   };
   const goToRegisterPage=()=>{

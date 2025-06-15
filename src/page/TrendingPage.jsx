@@ -24,7 +24,7 @@ export default function TrendingPage() {
     <div className="w-full ">
       <div className="p-[2rem]   flex items-center gap-[1rem]">
         <FontAwesomeIcon icon={faFire} className="text-7xl text-red-700" />
-        <p className="text-xl font-bold">Trending</p>
+        <p className="text-xl font-bold">Trending Videos</p>
       </div>
       <div className="border-b-1 mb-[2rem] border-gray-500"></div>
       <div className="pl-[2rem]"></div>

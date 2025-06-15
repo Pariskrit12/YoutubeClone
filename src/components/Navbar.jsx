@@ -20,10 +20,16 @@ export default function Navbar() {
   const goToCreateChannel = () => {
     navigate("/create-channel-page");
   };
+  const goToPostVideo=()=>{
+    navigate("/post-video")
+  }
+  const goTohomePage=()=>{
+    navigate('/')
+  }
   return (
     <>
       <nav className="sticky top-0  shadow z-50 bg-transparent backdrop-blur-2xl p-[1rem] w-full flex items-center  text-2xl text-black justify-between border-b-[1px] border-gray-500">
-        <div className="flex items-center">
+        <div onClick={goTohomePage} className="flex items-center cursor-pointer">
           <img
             className="w-[3rem]"
             src="https://upload.wikimedia.org/wikipedia/commons/e/ef/Youtube_logo.png"
@@ -37,7 +43,7 @@ export default function Navbar() {
         <div className="flex justify-between items-center w-[15rem]">
           {user?.channel ? (
             <div
-              onClick={goToCreateChannel}
+              onClick={goToPostVideo}
               className="flex cursor-pointer items-center bg-gray-700 text-white h-[3rem] w-[8rem] justify-evenly rounded-2xl font-bold text-2xl"
             >
               <p>Post</p>

@@ -4,6 +4,7 @@ import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBell, faBellSlash } from '@fortawesome/free-solid-svg-icons';
 
+
 export default function SubscribeButton({channelId}) {
     const{user}=useAuth();
     const[subscribed,setIsSubscribed]=useState(false)
@@ -19,6 +20,7 @@ export default function SubscribeButton({channelId}) {
     try {
         if(subscribed){
             await axios.put(`/api/v1/channels/unsubscribe-channel/${channelId}`,{},{withCredentials:true})
+           
             setIsSubscribed(false);
         }else{
             await axios.put(`/api/v1/channels/subscribe-channel/${channelId}`,{},{withCredentials:true})
@@ -32,7 +34,7 @@ export default function SubscribeButton({channelId}) {
     
   return (
     <div>
-      <div className="flex items-center justify-between bg-gray-200 w-[8rem] h-[2.5rem] px-[0.5rem] rounded-2xl border-[1px] border-gray-500" onClick={toggleSubsscriptionButton}>
+      <div className="cursor-pointer flex items-center justify-between bg-gray-200 w-[8rem] h-[2.5rem] px-[0.5rem] rounded-2xl border-[1px] border-gray-500" onClick={toggleSubsscriptionButton}>
        
        {subscribed ?"Subscribed":"Subscribe"}
        <FontAwesomeIcon icon={subscribed?faBell:faBellSlash}/>

@@ -5,6 +5,7 @@ import SavedVideoList from "../components/UploadVideo";
 import { Link } from "react-router-dom";
 import axios from "axios";
 
+
 export default function ProfilePage() {
   const [videos,setVideos]=useState([]);
   const { user } = useAuth();
@@ -42,11 +43,14 @@ export default function ProfilePage() {
             alt="User avatar"
           ></img>
           <div className="flex flex-col">
+          
             <p className="text-3xl font-extrabold">{user?.name}</p>
+           
+           
             <p className=" text-[20px]">{user?.email}</p>
             <p className="text-[20px]">Joined At: {formattedDate}</p>
             {user?.channel?._id && (
-              <Link to={`/channel/${channelId}`}>
+              <Link to={`/channel/${user?.channel?._id}`}>
                 <p className="text-[15px] text-blue-700 underline cursor-pointer">
                   View Channel
                 </p>

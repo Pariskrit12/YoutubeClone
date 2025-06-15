@@ -36,7 +36,7 @@ export default function WatchHistoryPage() {
     <div className="w-full ">
       
       <div className="p-[2rem] mb-[1.5rem] ">
-        <p className="text-3xl font-extrabold">Watch History</p>
+        <p className="text-3xl font-extrabold">Watch-History Videos</p>
       </div>
         {videos.length>0?(
       <div className="flex">

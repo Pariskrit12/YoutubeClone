@@ -9,10 +9,25 @@ import {
 import Dropdown from "./Dropdown";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 export default function Navbar() {
+  const [query, setQuery] = useState("");
+  const handleOnQuery = async (event) => {
+    try {
+      if (event.key === "Enter") {
+        const response = await axios.get("/api/v1/videos/search-video", {
+          params: { query },
+        });
+        console.log(response.data.data);
+      }
+    } catch (error) {
+      console.log("Error in searching", error);
+    }
+  };
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
+
   const toggleDropdown = () => {
     setDropdownOpen((prev) => !prev);
   };
@@ -20,23 +35,31 @@ export default function Navbar() {
   const goToCreateChannel = () => {
     navigate("/create-channel-page");
   };
-  const goToPostVideo=()=>{
-    navigate("/post-video")
-  }
-  const goTohomePage=()=>{
-    navigate('/')
-  }
+  const goToPostVideo = () => {
+    navigate("/post-video");
+  };
+  const goTohomePage = () => {
+    navigate("/");
+  };
   return (
     <>
       <nav className="sticky top-0  shadow z-50 bg-transparent backdrop-blur-2xl p-[1rem] w-full flex items-center  text-2xl text-black justify-between border-b-[1px] border-gray-500">
-        <div onClick={goTohomePage} className="flex items-center cursor-pointer">
+        <div
+          onClick={goTohomePage}
+          className="flex items-center cursor-pointer"
+        >
           <img
             className="w-[3rem]"
             src="https://upload.wikimedia.org/wikipedia/commons/e/ef/Youtube_logo.png"
           />
           <p className="font-bold">YouTube</p>
         </div>
-        <div className="hidden lg:flex w-[30rem] rounded-3xl  items-center border-[1px] h-[3rem] px-[1rem] ">
+        <div
+          className="hidden lg:flex w-[30rem] rounded-3xl  items-center border-[1px] h-[3rem] px-[1rem] "
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={handleOnQuery}
+        >
           <FontAwesomeIcon icon={faMagnifyingGlass} />
           <input className="focus:outline-none rounded-3xl px-[1rem] text- w-[28rem]"></input>
         </div>

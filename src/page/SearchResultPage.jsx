@@ -12,24 +12,22 @@ export default function SearchResultPage() {
     const fetchVideos = async () => {
       try {
         const response = await axios.get("/api/v1/videos/search-video", {
-          params: {query},
+          params: { query },
         });
         setVideos(response.data.data);
         console.log(response.data.data);
       } catch (error) {
-        console.log("failed to fetch search result videos",error);
-        
+        console.log("failed to fetch search result videos", error);
       }
     };
     fetchVideos();
   }, [query]);
 
-
-  return(
-    <div className="w-full p-[2rem]" >
-        {videos.map((video)=>(
-            <Videoc video={video} key={video._id}/>
-        ))}
+  return (
+    <div className="w-full p-[2rem]">
+      {videos.map((video) => (
+        <Videoc video={video} key={video._id} />
+      ))}
     </div>
-  )
+  );
 }

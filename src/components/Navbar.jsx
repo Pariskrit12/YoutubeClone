@@ -10,19 +10,43 @@ import Dropdown from "./Dropdown";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import SearchDropown from "./SearchDropownList";
+import SearchDropownList from "./SearchDropownList";
 export default function Navbar() {
   const [query, setQuery] = useState("");
-  const handleOnQuery = async (event) => {
-    try {
-      if (event.key === "Enter") {
+  const [suggestion, setSuggestion] = useState(false);
+  const [results, setResult] = useState([]);
+  const handleOnQuery = async (e) => {
+    const value = e.target.value;
+    setQuery(value);
+    if (value.trim()) {
+      try {
         const response = await axios.get("/api/v1/videos/search-video", {
-          params: { query },
+          params: { query: value },
         });
+        setResult(response.data.data);
         console.log(response.data.data);
+        
+        setSuggestion(true);
+      } catch (error) {
+        console.log("Error in searching", error);
       }
-    } catch (error) {
-      console.log("Error in searching", error);
+    } else {
+      setSuggestion(false);
     }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && query.trim()) {
+      navigate(`/search?q=${query}`);
+      setSuggestion(false);
+    }
+  };
+  const handleOnClick = (result) => {
+    const title = result.title;
+    setQuery(title);
+    navigate(`/search?q=${title}`);
+    setSuggestion(false);
   };
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { user } = useAuth();
@@ -54,15 +78,27 @@ export default function Navbar() {
           />
           <p className="font-bold">YouTube</p>
         </div>
-        <div
-          className="hidden lg:flex w-[30rem] rounded-3xl  items-center border-[1px] h-[3rem] px-[1rem] "
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={handleOnQuery}
-        >
+
+        <div className="hidden lg:flex w-[30rem] rounded-2xl  items-center border-[1px] h-[2.5rem] px-[1rem] ">
           <FontAwesomeIcon icon={faMagnifyingGlass} />
-          <input className="focus:outline-none rounded-3xl px-[1rem] text- w-[28rem]"></input>
+          <input
+            className="focus:outline-none rounded-2xl px-[1rem] text-[1rem]  w-[28rem]"
+            value={query}
+            onChange={handleOnQuery}
+            onKeyDown={handleKeyDown}
+          ></input>
         </div>
+        {suggestion && results.length > 0 && (
+          <div className="absolute top-[4.5rem] bg-gray-700 w-[30rem] left-[24rem] rounded-2xl h-[25rem] p-[1rem] overflow-y-auto  ">
+            {results.map((result) => (
+              <SearchDropownList
+                result={result}
+                key={result._id}
+                onClick={handleOnClick}
+              />
+            ))}
+          </div>
+        )}
         <div className="flex justify-between items-center w-[15rem]">
           {user?.channel ? (
             <div

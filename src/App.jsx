@@ -16,6 +16,7 @@ import SubscriptionPage from "./page/SubscriptionPage";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import PostVideo from "./page/PostVideo";
+import SearchResultPage from "./page/SearchResultPage";
 export default function App() {
   return (
     <>
@@ -36,6 +37,7 @@ export default function App() {
             <Route path="/popular" element={<PopularPage />} />
             <Route path="/subscription" element={<SubscriptionPage />} />
             <Route path="/post-video" element={<PostVideo />} />
+            <Route path="/search" element={<SearchResultPage/>}/>
           </Routes>
         
         <ToastContainer

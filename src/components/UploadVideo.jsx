@@ -1,3 +1,5 @@
+import { faCaretDown } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
 
 export default function UploadVideo({ video }) {
@@ -24,20 +26,29 @@ export default function UploadVideo({ video }) {
   return (
     <div>
       <div className="xl:w-[20rem] md:w-[14rem] w-[15rem] p-[1rem] ml-[2rem]  mt-[2rem]  rounded-xl border-gray-600">
-        <div className="font-semibold">
+        <div className="font-semibold ">
           <img
             className="rounded-xl mb-0.5 h-[13rem] w-[25rem] border-[1px] "
             src={video.thumbnail}
           />
-          <div className="flex items-center gap-[0.5rem]">
-            <div className="flex flex-col  mr-[40px]">
-              <div className=" gap-1">
-                <p>{video.title}</p>
+          <div className=" flex">
+            <div className="flex items-center gap-[0.5rem] w-[17rem] ">
+              <div className="flex flex-col  mr-[40px]">
+                <div className=" gap-1">
+                  <p>
+                    {video.title.length > 25
+                      ? video.title.slice(0, 25) + "..."
+                      : video.title}
+                  </p>
+                </div>
+                <div className="flex  gap-[1rem]">
+                  <p>{video.views} views</p>
+                  <p>{timeAgo}</p>
+                </div>
               </div>
-              <div className="flex  gap-[1rem]">
-                <p>{video.views} views</p>
-                <p>{timeAgo}</p>
-              </div>
+            </div>
+            <div >
+              <FontAwesomeIcon className="cursor-pointer" icon={faCaretDown}/>
             </div>
           </div>
         </div>

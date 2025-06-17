@@ -3,7 +3,7 @@ import React from "react";
 import SubscribeButton from "./SubscribeButton";
 export default function ChannelCard({ channel }) {
   return (
-    <div className="bg-gray-700 w-[60rem] flex items-center h-[12rem] p-[1rem] justify-between rounded-2xl border-[1px] border-gray-400 mb-[2rem]">
+    <div className="bg-gray-900 w-[60rem] flex items-center h-[12rem] p-[1rem] justify-between rounded-2xl border-[1px] border-gray-400 mb-[2rem]">
       <div className="">
         <img
           className="w-[10rem] bg-black h-[10rem] rounded-full "

@@ -5,7 +5,7 @@ import axios from "axios";
 export default function Videoc({ video }) {
   
   return (
-    <div className="bg-gray-700 flex w-[50rem] rounded-xl border-1 border-gray-400 gap-[1rem] mb-[1rem] text-white cursor-pointer ">
+    <div className="bg-gray-900 flex w-[50rem] rounded-xl border-1 border-gray-400 gap-[1rem] mb-[1rem] text-white cursor-pointer ">
       <div>
         <img
           src={video?.thumbnail}

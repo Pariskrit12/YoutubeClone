@@ -1,12 +1,13 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleCheck } from "@fortawesome/free-solid-svg-icons";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 export default function VideoCard({ video }) {
+  const navigate = useNavigate();
   const createdAt = new Date(video.createdAt);
   const now = new Date();
   const differenceInMilliseconds = now - createdAt;
-
   let timeAgo;
   if (differenceInMilliseconds < 60 * 1000) {
     timeAgo = `${Math.floor(differenceInMilliseconds / 1000)} seconds ago`;
@@ -24,10 +25,20 @@ export default function VideoCard({ video }) {
     )} days ago`;
   }
 
-
+  const handleOnClickVideo = async () => {
+    try {
+      await axios.post(`/api/v1/videos/watch-video/${video._id}`);
+      navigate(`/video/${video._id}`);
+    } catch (error) {
+      console.log("Failed to watch video", error);
+    }
+  };
 
   return (
-    <div className="xl:w-[23rem] md:w-[14rem] w-[15rem] p-[1rem] ml-[2rem]  mt-[2rem]  rounded-xl border-gray-600  h-[21rem]">
+    <div
+      className="xl:w-[23rem] md:w-[14rem] w-[15rem] p-[1rem] ml-[2rem]  mt-[2rem]  rounded-xl border-gray-600  h-[21rem] hover:bg-gray-200 cursor-pointer"
+      onClick={handleOnClickVideo}
+    >
       <div className="font-semibold">
         <img
           className="rounded-xl mb-0.5 h-[13rem] w-[25rem] border-[1px] "
@@ -51,7 +62,7 @@ export default function VideoCard({ video }) {
             </div>
             <div className="flex gap-[1rem] items-center">
               <Link to={`/channel/${video.channel?._id}`}>
-              <p>{video.channel.channelName}</p>
+                <p>{video.channel.channelName}</p>
               </Link>
               <FontAwesomeIcon icon={faCircleCheck} />
             </div>

@@ -9,48 +9,40 @@ import {
 import Dropdown from "./Dropdown";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import SearchDropown from "./SearchDropownList";
+
 import SearchDropownList from "./SearchDropownList";
+import { useSearchVideosQuery } from "../api/videoApi";
 export default function Navbar() {
   const [query, setQuery] = useState("");
   const [suggestion, setSuggestion] = useState(false);
-  const [results, setResult] = useState([]);
-  const handleOnQuery = async (e) => {
+  const navigate = useNavigate();
+
+  const { data, isLoading } = useSearchVideosQuery(query, {
+    skip: !query.trim(),
+  });
+
+  const handleOnQuery = (e) => {
     const value = e.target.value;
     setQuery(value);
-    if (value.trim()) {
-      try {
-        const response = await axios.get("/api/v1/videos/search-video", {
-          params: { query: value },
-        });
-        setResult(response.data.data);
-        console.log(response.data.data);
-        
-        setSuggestion(true);
-      } catch (error) {
-        console.log("Error in searching", error);
-      }
-    } else {
-      setSuggestion(false);
-    }
+    setSuggestion(!!value.trim()); //only show suggestion when there is something written in search inpu
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter" && query.trim()) {
+  const results = data?.data;
+
+  const handleKeyDown = (event) => {
+    if (event.key === "Enter") {
       navigate(`/search?q=${query}`);
-      setSuggestion(false);
     }
+    setSuggestion(false)
   };
-  const handleOnClick = (result) => {
-    const title = result.title;
-    setQuery(title);
-    navigate(`/search?q=${title}`);
+
+  const handleOnClick = () => {
+    navigate(`/search?q=${query}`);
     setSuggestion(false);
   };
+
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { user } = useAuth();
-  const navigate = useNavigate();
 
   const toggleDropdown = () => {
     setDropdownOpen((prev) => !prev);
@@ -65,12 +57,13 @@ export default function Navbar() {
   const goTohomePage = () => {
     navigate("/");
   };
+  if (isLoading) return <p>loading</p>;
   return (
     <>
       <nav className="sticky top-0  shadow z-50 bg-transparent backdrop-blur-2xl p-[1rem] w-full flex items-center  text-2xl text-black justify-between border-b-[1px] border-gray-500">
         <div
           onClick={goTohomePage}
-          className="flex items-center cursor-pointer"
+          className="flex items-center cursor-pointer gap-[10px]"
         >
           <img
             className="w-[3rem]"

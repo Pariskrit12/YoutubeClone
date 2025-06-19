@@ -1,0 +1,75 @@
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import axios from "axios";
+import { likeVideo } from "./likeVideo";
+
+export const likeComment = createAsyncThunk(
+  "commentInterraction/likeComment",
+  async (commentId, thunkAPI) => {
+    await axios.post(
+      `/api/v1/likes/like-comment/${commentId}`,
+      {},
+      { withCredentials: true }
+    );
+    return { commentId };
+  }
+);
+
+export const dislikeComment = createAsyncThunk(
+  "commentInterraction/dislikeComment",
+  async (commentId, thunkAPI) => {
+    await axios.post(
+      `/api/v1/likes/dislike-comment/${commentId}`,
+      {},
+      { withCredentials: true }
+    );
+    return { commentId };
+  }
+);
+
+const commentInterractionSlice = createSlice({
+  name: "commentInterraction",
+  initialState: {
+    likedComments: {},
+    dislikedComments: {},
+    likeCounts: {},
+    dislikeCounts: {},
+  },
+  reducers: {},
+  extraReducers: (builder) => {
+    builder.
+    addCase(likeComment.fulfilled, (state, action) => {
+      const cId = action.payload.commentId;
+      const isLiked = !!state.likedComments[cId];
+
+      if (isLiked) {
+        delete state.likedComments[cId];
+        state.likeCounts[cId] = (state.likeCounts[cId] || 1) - 1;
+      } else {
+        state.likedComments[cId] = true;
+        state.likeCounts[cId] = (state.likeCounts[cId] || 0) + 1;
+        if (state.dislikedComments[cId]) {
+          delete state.dislikedComments[cId];
+          state.dislikeCounts[cId] = (state.dislikeCounts[cId] || 1) - 1;
+        }
+      }
+    })
+    .addCase(dislikeComment.fulfilled,(state,action)=>{
+        const cId=action.payload.commentId;
+        const isDisliked=!!state.dislikedComments[cId];
+        if(isDisliked){
+            delete state.dislikedComments[cId];
+            state.dislikeCounts[cId]=(state.dislikeCounts[cId]||1)-1
+        }
+        else{
+            state.dislikedComments[cId]=true;
+            state.dislikeCounts[cId]=(state.dislikeCounts[cId]||0)+1
+            if(state.likedComments[cId]){
+                delete state.likedComments[cId];
+                state.likeCounts[cId]=(state.likeCounts[cId]||1)-1
+            }
+        }
+    });
+  },
+  
+});
+export default commentInterractionSlice.reducer;

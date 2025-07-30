@@ -12,10 +12,14 @@ import { useNavigate } from "react-router-dom";
 
 import SearchDropownList from "./SearchDropownList";
 import { useSearchVideosQuery } from "../api/videoApi";
+import { useSelector } from "react-redux";
 export default function Navbar() {
   const [query, setQuery] = useState("");
   const [suggestion, setSuggestion] = useState(false);
   const navigate = useNavigate();
+  const userData = useSelector((state) => state.auth.user);
+  const user = userData?.user;
+  const isAdmin=useSelector((state)=>state.auth.isAdmin);
 
   const { data, isLoading } = useSearchVideosQuery(query, {
     skip: !query.trim(),
@@ -33,7 +37,7 @@ export default function Navbar() {
     if (event.key === "Enter") {
       navigate(`/search?q=${query}`);
     }
-    setSuggestion(false)
+    setSuggestion(false);
   };
 
   const handleOnClick = () => {
@@ -42,7 +46,6 @@ export default function Navbar() {
   };
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const { user } = useAuth();
 
   const toggleDropdown = () => {
     setDropdownOpen((prev) => !prev);
@@ -58,6 +61,7 @@ export default function Navbar() {
     navigate("/");
   };
   if (isLoading) return <p>loading</p>;
+
   return (
     <>
       <nav className="sticky top-0  shadow z-50 bg-transparent backdrop-blur-2xl p-[1rem] w-full flex items-center  text-2xl text-black justify-between border-b-[1px] border-gray-500">
@@ -71,6 +75,7 @@ export default function Navbar() {
           />
           <p className="font-bold">YouTube</p>
         </div>
+        {!isAdmin &&(
 
         <div className="hidden lg:flex w-[30rem] rounded-2xl  items-center border-[1px] h-[2.5rem] px-[1rem] ">
           <FontAwesomeIcon icon={faMagnifyingGlass} />
@@ -81,6 +86,7 @@ export default function Navbar() {
             onKeyDown={handleKeyDown}
           ></input>
         </div>
+        )}
         {suggestion && results.length > 0 && (
           <div className="absolute top-[4.5rem] bg-gray-700 w-[30rem] left-[24rem] rounded-2xl h-[25rem] p-[1rem] overflow-y-auto  ">
             {results.map((result) => (

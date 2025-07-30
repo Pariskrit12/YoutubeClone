@@ -18,39 +18,47 @@ import "react-toastify/dist/ReactToastify.css";
 import PostVideo from "./page/PostVideo";
 import SearchResultPage from "./page/SearchResultPage";
 import WatchVideoPage from "./page/WatchVideoPage";
+
+import EditPage from "./page/EditPage";
+import EditVideo from "./page/EditVideo";
+import Dashboard from "./page/admin/Dashboard";
 export default function App() {
   return (
     <>
       <Navbar />
       <div className="flex  ">
         <Sidebar />
-        
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/profile/:userId" element={<ProfilePage />} />
-            <Route path="/create-channel-page" element={<CreateChannel />} />
-            <Route path="/channel/:channelId" element={<Channel />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/history" element={<WatchHistoryPage />} />
-            <Route path="/trending" element={<TrendingPage />} />
-            <Route path="/liked" element={<LikedPage />} />
-            <Route path="/popular" element={<PopularPage />} />
-            <Route path="/subscription" element={<SubscriptionPage />} />
-            <Route path="/post-video" element={<PostVideo />} />
-            <Route path="/search" element={<SearchResultPage/>}/>
-            <Route path="/video/:videoId" element={<WatchVideoPage/>}/>
-          </Routes>
-        
+
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/profile/:userId" element={<ProfilePage />} />
+          <Route path="/create-channel-page" element={<CreateChannel />} />
+          <Route path="/channel/:channelId" element={<Channel />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/history" element={<WatchHistoryPage />} />
+          <Route path="/trending" element={<TrendingPage />} />
+          <Route path="/liked" element={<LikedPage />} />
+          <Route path="/popular" element={<PopularPage />} />
+          <Route path="/subscription" element={<SubscriptionPage />} />
+          <Route path="/post-video" element={<PostVideo />} />
+          <Route path="/search" element={<SearchResultPage />} />
+          <Route path="/video/:videoId" element={<WatchVideoPage />} />
+          <Route path="/edit/:channelId" element={<EditPage />} />
+          <Route
+            path="/edit-video/:videoId/:channelId"
+            element={<EditVideo />}
+          />
+          <Route path="/admin-dashboard" element={<Dashboard />} />
+        </Routes>
+
         <ToastContainer
           position="top-right"
           autoClose={2000}
           hideProgressBar={false}
           newestOnTop={true}
           closeOnClick
-          pauseOnFocusLoss
           draggable
-          pauseOnHover
           theme="light"
         />
       </div>

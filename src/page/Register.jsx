@@ -1,6 +1,7 @@
 import axios from "axios";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useRegistrationMutation } from "../api/userApi";
 const FormItem = ({
   label,
   id,
@@ -37,26 +38,23 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [avatar, setAvatar] = useState(null);
   const navigate=useNavigate();
-
+const[registration,{isLoading}]=useRegistrationMutation()
   const handleOnSubmit = async (e) => {
     e.preventDefault();
+    const formData = new FormData();
+    formData.append("name", fullName);
+    formData.append("username", userName);
+    formData.append("email", email);
+    formData.append("password", password);
+    if (avatar) formData.append("avatar", avatar);
     try {
-      const formData = new FormData();
-      formData.append("name", fullName);
-      formData.append("username", userName);
-      formData.append("email", email);
-      formData.append("password", password);
-      if (avatar) formData.append("avatar", avatar);
-
-      const response = await axios.post("/api/v1/users/register", formData, {
-        withCredentials: true,
-      });
-      navigate('/login')
-      console.log("Successfully registered user", response.data.data);
+      registration(formData);
+      navigate('/login');
     } catch (error) {
       console.log("Failed in registring user", error);
     }
   };
+ 
   return (
     <div className=" w-full mt-[3rem]">
       <form
@@ -115,7 +113,7 @@ export default function Register() {
               type="submit"
               className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 "
             >
-              Submit
+              {isLoading ?"Loading...":"Submit"}
             </button>
           </div>
         </div>

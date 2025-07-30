@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { act } from "react";
-
+import { logout } from "./auth";
+import { videoApi } from "../../api/videoApi";
 const videoInteractionSlice = createSlice({
   name: "videoInteraction",
   initialState: {
@@ -41,86 +41,26 @@ const videoInteractionSlice = createSlice({
         }
       }
     },
+    //actual state after backend response
+    setInteractionState: (state, action) => {
+      const { videoId, isLiked, isDisliked, dislikeCount, likeCount } =
+        action.payload;
+      (state.likedVideo[videoId] = isLiked),
+        (state.dislikedVideo[videoId] = isDisliked),
+        (state.dislikeCounts[videoId] = dislikeCount),
+        (state.likeCounts[videoId] = likeCount);
+    },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(logout, (state) => {
+      (state.likedVideo = {}),
+        (state.dislikedVideo = {}),
+        (state.likeCounts = {}),
+        (state.dislikeCounts = {});
+    });
   },
 });
 
-export const { like,dislike } = videoInteractionSlice.actions;
+export const { like, dislike, setInteractionState } =
+  videoInteractionSlice.actions;
 export default videoInteractionSlice.reducer;
-
-
-
-
-// import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-// import axios from "axios";
-
-// export const likeVideo = createAsyncThunk(
-//   "likes/likeVideo",
-//   async (videoId, thunkAPI) => {
-//     await axios.post(
-//       `/api/v1/likes/like-video/${videoId}`,
-//       {},
-//       { withCredentials: true }
-//     );
-//     return { videoId };
-//   }
-// );
-
-// export const dislikeVideo = createAsyncThunk(
-//   "likes/dislikeVideo",
-//   async (videoId, thunkAPI) => {
-//     await axios.post(
-//       `/api/v1/likes/dislike-video/${videoId}`,
-//       {},
-//       { withCredentials: true }
-//     );
-//     return { videoId };
-//   }
-// );
-
-// const likeSlice = createSlice({
-//   name: "likes",
-//   initialState: {
-//     likeCounts: {}, //{[videoid]:count}
-//     dislikeCounts: {},
-//     likedVideos: {}, // { [videoId]: true }
-//     dislikedVideos: {},
-//   },
-//   reducers: {},
-//   extraReducers: (builder) => {
-//     builder
-//       .addCase(likeVideo.fulfilled, (state, action) => {
-//         const vid = action.payload.videoId;
-//         const isLiked = !!state.likedVideos[vid];
-
-//         if (isLiked) {
-//           delete state.likedVideos[vid];
-//           state.likeCounts[vid] = (state.likeCounts[vid] || 1) - 1;
-//         } else {
-//           state.likedVideos[vid] = true;
-//           state.likeCounts[vid] = (state.likeCounts[vid] || 0) + 1;
-//           if (state.dislikedVideos[vid]) {
-//             delete state.dislikedVideos[vid];
-//             state.dislikeCounts[vid] = (state.dislikeCounts[vid] || 1) - 1;
-//           }
-//         }
-//       })
-//       .addCase(dislikeVideo.fulfilled, (state, action) => {
-//         const vid = action.payload.videoId;
-//         const isDisliked = !!state.dislikedVideos[vid];
-
-//         if (isDisliked) {
-//           delete state.dislikedVideos[vid];
-//           state.dislikeCounts[vid] = (state.dislikeCounts[vid] || 1) - 1;
-//         } else {
-//           state.dislikedVideos[vid] = true;
-//           state.dislikeCounts[vid] = (state.dislikeCounts[vid] || 0) + 1;
-//           if (state.likedVideos[vid]) {
-//             delete state.likedVideos[vid];
-//             state.likeCounts[vid] = (state.likeCounts[vid] || 1) - 1;
-//           }
-//         }
-//       });
-//   },
-// });
-
-// export default likeSlice.reducer;

@@ -1,9 +1,8 @@
 import { faBell } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import axios from "axios";
-import React, { useEffect, useState } from "react";
+
 import ChannelCard from "../components/ChannelCard";
-import { useGetSubscribedChannelOfUserQuery } from "../api/videoApi";
+import { useGetSubscribedChannelOfUserQuery } from "../api/channelApi";
 import Spinner from "../components/Spinner";
 
 export default function SubscriptionPage() {

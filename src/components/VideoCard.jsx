@@ -1,34 +1,24 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleCheck } from "@fortawesome/free-solid-svg-icons";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { formatTimeAgo } from "../util/formatTime";
+import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
+
 export default function VideoCard({ video }) {
   const navigate = useNavigate();
-  const createdAt = new Date(video.createdAt);
-  const now = new Date();
-  const differenceInMilliseconds = now - createdAt;
-  let timeAgo;
-  if (differenceInMilliseconds < 60 * 1000) {
-    timeAgo = `${Math.floor(differenceInMilliseconds / 1000)} seconds ago`;
-  } else if (differenceInMilliseconds < 60 * 60 * 1000) {
-    timeAgo = `${Math.floor(
-      differenceInMilliseconds / (1000 * 60)
-    )} minutes ago`;
-  } else if (differenceInMilliseconds < 24 * 60 * 60 * 1000) {
-    timeAgo = `${Math.floor(
-      differenceInMilliseconds / (1000 * 60 * 60)
-    )} hours ago`;
-  } else {
-    timeAgo = `${Math.floor(
-      differenceInMilliseconds / (1000 * 60 * 60 * 24)
-    )} days ago`;
-  }
-
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const handleOnClickVideo = async () => {
     try {
-      await axios.post(`/api/v1/videos/watch-video/${video._id}`);
-      navigate(`/video/${video._id}`);
+      if (isLoggedIn) {
+        await axios.post(`/api/v1/videos/watch-video/${video._id}`);
+        navigate(`/video/${video._id}`);
+      } else {
+        toast.success("You have to Login first");
+        navigate("/login");
+      }
     } catch (error) {
       console.log("Failed to watch video", error);
     }
@@ -61,14 +51,13 @@ export default function VideoCard({ video }) {
               </p>
             </div>
             <div className="flex gap-[1rem] items-center">
-              <Link to={`/channel/${video.channel?._id}`}>
-                <p>{video.channel.channelName}</p>
-              </Link>
+              <p>{video.channel.channelName}</p>
+
               <FontAwesomeIcon icon={faCircleCheck} />
             </div>
             <div className="flex  gap-[1rem]">
               <p>{video.views} views</p>
-              <p>{timeAgo}</p>
+              <p>{formatTimeAgo(video?.createdAt)}</p>
             </div>
           </div>
         </div>

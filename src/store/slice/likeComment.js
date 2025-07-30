@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
-
-export const commentInterractionSlice = createSlice({
+import { logout } from "./auth";
+const commentInterractionSlice = createSlice({
   name: "commentInteraction",
   initialState: {
     likedComment: {},
@@ -39,15 +39,32 @@ export const commentInterractionSlice = createSlice({
         state.dislikedCount[commentId] =
           (state.dislikedCount[commentId] || 0) + 1;
         if (state.likedComment[commentId]) {
-          delete state.likedComment[commentId] 
+          delete state.likedComment[commentId];
           state.likedCount[commentId] = (state.likedCount[commentId] || 1) - 1;
         }
       }
     },
+    setCommentInteractionState: (state, action) => {
+      const { commentId, isLiked, isDisliked, likeCount, dislikeCount } =
+        action.payload;
+      (state.dislikedCount[commentId] = dislikeCount),
+        (state.likedCount[commentId] = likeCount),
+        (state.likedComment[commentId] = isLiked),
+        (state.dislikedComment[commentId] = isDisliked);
+    },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(logout, (state) => {
+      (state.likedComment = {}),
+        (state.dislikedComment = {}),
+        (state.likedCount = {}),
+        (state.dislikedCount = {});
+    });
   },
 });
 
-export const { likeComment,dislikeComment } = commentInterractionSlice.actions;
+export const { likeComment, dislikeComment, setCommentInteractionState } =
+  commentInterractionSlice.actions;
 export default commentInterractionSlice.reducer;
 
 // import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";

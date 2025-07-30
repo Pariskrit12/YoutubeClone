@@ -1,8 +1,10 @@
 import VideoCard from "../components/VideoCard";
 import { useGetAllVideosQuery } from "../api/videoApi";
 import Spinner from "../components/Spinner";
+import { useSelector } from "react-redux";
 
 export default function Home() {
+  const isLoggedIn=useSelector((state)=>state.auth.isLoggedIn);
   const { data, isError, isLoading } = useGetAllVideosQuery();
   if (isLoading) return <p className="text-white">Loading...</p>;
   if (isError) return <p className="text-red-500">Error fetching videos.</p>;

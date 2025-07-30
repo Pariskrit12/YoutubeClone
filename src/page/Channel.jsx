@@ -1,42 +1,28 @@
-import axios from "axios";
-import React, { useEffect, useState } from "react";
 import { data, useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import UploadVideo from "../components/UploadVideo";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleCheck } from "@fortawesome/free-solid-svg-icons";
 import SubscribeButton from "../components/SubscribeButton";
-import { useGetChannelVideoQuery } from "../api/videoApi";
+import { useGetChannelVideoQuery } from "../api/channelApi";
 import Spinner from "../components/Spinner";
+import { useGetChannelInfoQuery } from "../api/channelApi";
+import { formatTimeAgo } from "../util/formatTime";
+import { Link } from "react-router-dom";
 export default function Channel() {
-  const [channel, setChannel] = useState({});
-
   const { user } = useAuth();
   const { channelId } = useParams();
-  useEffect(() => {
-    const fetchChannel = async () => {
-      const response = await axios(
-        `/api/v1/channels/get-channel-info/${channelId}`
-      );
+console.log(user);
 
-      setChannel(response.data.data);
-    };
-    fetchChannel();
-  }, [channelId]);
-  let formattedDate = "";
-  if (channel?.createdAt) {
-    const date = new Date(channel.createdAt);
-    if (!isNaN(date)) {
-      formattedDate = `${date.getDate()} ${date.toLocaleString("default", {
-        month: "long",
-      })} ${date.getFullYear()}`;
-    }
-  }
-  const { data, isLoading } = useGetChannelVideoQuery(channelId);
+  const { data: channelInfo, isLoading: channelInfoLoading } =
+    useGetChannelInfoQuery(channelId);
+  const channel = channelInfo?.data;
 
-  const videos = data?.data;
-  console.log(videos);
+  const { data: channelVideos, isLoading } = useGetChannelVideoQuery(channelId);
 
+  const videos = channelVideos?.data;
+ 
+  if (channelInfoLoading) return <p>Loading</p>;
   return isLoading ? (
     <Spinner />
   ) : (
@@ -62,10 +48,15 @@ export default function Channel() {
             <FontAwesomeIcon className="text-2xl" icon={faCircleCheck} />
           </div>
           <p className="font-semibold text-[20px]">
-            Channel Created At: {formattedDate}
+            Channel Created At: {formatTimeAgo(channel?.createdAt)}
           </p>
-          {user?.channel._id !== channelId && (
+
+          {user?.channel?._id !== channelId ? (
             <SubscribeButton channelId={channelId} />
+          ) : (
+            <Link to={`/edit/${channelId}`}>
+            <p className="text-blue-700 underline text-xl font-semibold">Edit</p>
+            </Link>
           )}
         </div>
       </div>
@@ -74,7 +65,7 @@ export default function Channel() {
       </div>
       <div className=" xl:ml-[1rem] grid grid-cols-2 md:grid-cols-3">
         {videos.map((video) => (
-          <UploadVideo video={video} key={video._id} />
+          <UploadVideo video={video} key={video._id} channelId={channelId}/>
         ))}
       </div>
     </div>

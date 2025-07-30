@@ -5,15 +5,24 @@ const authSlice = createSlice({
   initialState: {
     isLoggedIn: false,
     user: null,
+    role: "",
+    isAdmin:false
   },
   reducers: {
     login: (state, action) => {
       state.isLoggedIn = true;
       state.user = action.payload;
+      state.role = action.payload.user?.role;
+      if(state.role==="admin"){
+        state.isAdmin=true;
+      }
+      
     },
     logout: (state) => {
       state.isLoggedIn = false;
       state.user = null;
+      state.role = "";
+      state.isAdmin=false
     },
   },
 });

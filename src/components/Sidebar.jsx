@@ -8,7 +8,12 @@ import {
   faBell,
   faFire,
   faBolt,
+  faDashboard,
+  faVideo,
+  faComment,
+  faUser,
 } from "@fortawesome/free-solid-svg-icons";
+import { useSelector } from "react-redux";
 
 const SidebarItem = ({ icon, label, active, onClick }) => (
   <div
@@ -25,17 +30,23 @@ const SidebarItem = ({ icon, label, active, onClick }) => (
 export default function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
-
-  const navItems = [
-    { icon: faHouse, label: "Home", path: "/" },
-    { icon: faClockRotateLeft, label: "History", path: "/history" },
-    { icon: faThumbsUp, label: "Liked", path: "/liked" },
-
-    { icon: faBell, label: "Subs", path: "/subscription" },
-
-    { icon: faBolt, label: "Popular", path: "/popular" },
-    { icon: faFire, label: "Trending", path: "/trending" },
-  ];
+  const isAdmin = useSelector((state) => state.auth.isAdmin);
+  let navItems = [];
+  if (isAdmin) {
+    navItems = [
+      { icon: faDashboard, label: "Dashboard", path: "/admin-dashboard" },
+     
+    ];
+  } else {
+    navItems = [
+      { icon: faHouse, label: "Home", path: "/" },
+      { icon: faClockRotateLeft, label: "History", path: "/history" },
+      { icon: faThumbsUp, label: "Liked", path: "/liked" },
+      { icon: faBell, label: "Subs", path: "/subscription" },
+      { icon: faBolt, label: "Popular", path: "/popular" },
+      { icon: faFire, label: "Trending", path: "/trending" },
+    ];
+  }
 
   return (
     <div className="hidden lg:flex bg-white sticky text-black w-24 h-screen flex-col items-center pt-4 space-y-4">

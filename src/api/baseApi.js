@@ -5,5 +5,6 @@ export const baseApi=createApi({
         baseUrl:" http://localhost:5173/",
         credentials:"include"
     }),
-    endpoints:()=>({})
+    endpoints:()=>({}),
+    tagTypes:["video","comments"]
 })

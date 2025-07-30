@@ -7,10 +7,9 @@ export const videoApi = baseApi.injectEndpoints({
     }),
     getLikedVideo: builder.query({
       query: () => "api/v1/videos/get-liked-video",
+      providesTags:["video"]
     }),
-    getSubscribedChannelOfUser: builder.query({
-      query: () => `api/v1/channels/subscribed-channel`,
-    }),
+
     getPopularVideos: builder.query({
       query: () => "api/v1/videos/get-popular-video",
     }),
@@ -20,9 +19,7 @@ export const videoApi = baseApi.injectEndpoints({
     getTrendingVideo: builder.query({
       query: () => "/api/v1/videos/get-trending-video",
     }),
-    getChannelVideo: builder.query({
-      query: (channelId) => `/api/v1/channels/get-channel-video/${channelId}`,
-    }),
+
     getSavedVideo: builder.query({
       query: () => "/api/v1/videos/get-saved-video",
     }),
@@ -35,21 +32,80 @@ export const videoApi = baseApi.injectEndpoints({
         params: { query: searchTerms },
       }),
     }),
-     suggestedVideos:builder.query({
-        query:(videoId)=>`api/v1/videos/suggest-video/${videoId}`
+    suggestedVideos: builder.query({
+      query: (videoId) => `api/v1/videos/suggest-video/${videoId}`,
+    }),
+
+    saveVideo: builder.mutation({
+      query: (videoId) => ({
+        url: `api/v1/videos/save-video/${videoId}`,
+        method: "POST",
       }),
+    }),
+    unSaveVideo: builder.mutation({
+      query: (videoId) => ({
+        url: `api/v1/videos/unsave-video/${videoId}`,
+        method: "POST",
+      }),
+    }),
+    postVideo: builder.mutation({
+      query: ({ channelId, formData }) => ({
+        url: `api/v1/videos/upload-video/${channelId}`,
+        method: "POST",
+        body: formData,
+      }),
+    }),
+    updateVideoTitleOrDescription: builder.mutation({
+      query: ({ videoId, ...updates }) => ({
+        url: `api/v1/videos/update-video-info/${videoId}`,
+        method: "PUT",
+        body: updates,
+      }),
+    }),
+    updateVideoThumbnail: builder.mutation({
+      query: ({ videoId, formData }) => ({
+        url: `api/v1/videos/update-video-thumbnail/${videoId}`,
+        method: "PUT",
+        body: formData,
+      }),
+    }),
+    deleteVideo: builder.mutation({
+      query: ({ videoId, channelId }) => ({
+        url: `api/v1/videos/delete-video/${videoId}/${channelId}`,
+        method: "DELETE",
+      }),
+    }),
+    likeVideo: builder.mutation({
+      query: (videoId) => ({
+        url: `api/v1/likes/like-video/${videoId}`,
+        method: "POST",
+      }),
+      invalidatesTags:["video"]
+    }),
+    dislikeVideo: builder.mutation({
+      query: (videoId) => ({
+        url: `api/v1/likes/dislike-video/${videoId}`,
+        method: "POST",
+      }),
+    }),
   }),
 });
 export const {
   useGetAllVideosQuery,
   useGetLikedVideoQuery,
-  useGetSubscribedChannelOfUserQuery,
   useGetPopularVideosQuery,
   useGetWatchedVideoQuery,
   useGetTrendingVideoQuery,
-  useGetChannelVideoQuery,
   useGetSavedVideoQuery,
   useGetVideoInfoQuery,
   useSearchVideosQuery,
-  useSuggestedVideosQuery
+  useSuggestedVideosQuery,
+  useSaveVideoMutation,
+  useUnSaveVideoMutation,
+  usePostVideoMutation,
+  useUpdateVideoTitleOrDescriptionMutation,
+  useUpdateVideoThumbnailMutation,
+  useDeleteVideoMutation,
+  useLikeVideoMutation,
+  useDislikeVideoMutation
 } = videoApi;

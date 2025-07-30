@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import axios from "axios";
+
 import { useNavigate } from "react-router-dom";
+import { usePostVideoMutation } from "../api/videoApi";
+import { toast } from "react-toastify";
 const FormItem = ({
   label,
   type,
@@ -31,12 +33,14 @@ const FormItem = ({
   </div>
 );
 export default function PostVideo() {
+  const { user } = useAuth();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [tags, setTags] = useState([]);
   const [video, setVideo] = useState(null);
   const [thumbnail, setThumbnail] = useState(null);
   const navigate = useNavigate();
+
   const handleTagChange = (e) => {
     const value = e.target.value;
     const tagArray = value
@@ -45,34 +49,27 @@ export default function PostVideo() {
       .filter((tag) => tag !== "");
     setTags(tagArray);
   };
+  const [postVideo, { isLoading: postVideoLoading }] = usePostVideoMutation();
+  const channelId = user?.channel?._id;
   const handleOnSubmit = async (e) => {
     e.preventDefault();
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("description", description);
+    formData.append("tags", JSON.stringify(tags));
+    if (video) formData.append("video", video);
+    if (thumbnail) formData.append("thumbnail", thumbnail);
+
     try {
-      const formData = new FormData();
-      formData.append("title", title);
-      formData.append("description", description);
-      formData.append("tags", JSON.stringify(tags));
-      if (video) formData.append("video", video);
-      if (thumbnail) formData.append("thumbnail", thumbnail);
-      await axios.post(
-        `/api/v1/videos/upload-video/${user?.channel?._id}`,
-        formData,
-        {
-          withCredentials: true,
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      await postVideo({ channelId, formData }).unwrap();
+      toast.success("Successfully Uploaded Video")
       navigate("/");
       console.log("Uploaded successfully");
-      
     } catch (error) {
-        console.log("Failed to upload video");
-        
+      console.log("Failed to upload video");
     }
   };
-  const { user } = useAuth();
+ 
   return (
     <div className="flex w-full mt-[3rem]">
       <form
@@ -126,7 +123,7 @@ export default function PostVideo() {
             type="submit"
             className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
           >
-            Submit
+            {postVideoLoading?"Loading....":"Upload"}
           </button>
         </div>
       </form>

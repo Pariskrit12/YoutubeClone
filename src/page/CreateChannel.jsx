@@ -1,6 +1,6 @@
-import axios from "axios";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useCreateChannelMutation } from "../api/channelApi";
 const FormItem = ({
   label,
   type,
@@ -34,7 +34,8 @@ export default function CreateChannel() {
   const [description, setDescription] = useState("");
   const [avatar, setAvatar] = useState(null);
   const [banner, setBanner] = useState(null);
-    const navigate=useNavigate();
+  const navigate = useNavigate();
+  const [createChannel, { isLoading }] = useCreateChannelMutation();
   const handleOnSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -43,18 +44,9 @@ export default function CreateChannel() {
       formdata.append("description", description);
       if (avatar) formdata.append("avatar", avatar);
       if (banner) formdata.append("banner", banner);
-      const response = await axios.post(
-        "/api/v1/channels/create-channel",
-        formdata,
-        {
-          withCredentials: true,
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-      console.log("Channel Created successfully", response.data.data);
-      navigate('/')
+      await createChannel(formdata);
+
+      navigate("/");
     } catch (error) {
       console.log("Failed in creating channel", error);
     }
@@ -102,7 +94,7 @@ export default function CreateChannel() {
           type="submit"
           className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
         >
-          Submit
+          {isLoading ? "Loading..." : "Submit"}
         </button>
       </form>
     </div>

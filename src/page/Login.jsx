@@ -3,26 +3,37 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-toastify";
+import { useLoginUserMutation } from "../api/userApi";
+import { useDispatch } from "react-redux";
+import { login } from "../store/slice/auth";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const dispatch = useDispatch();
+
+  const [loginUser, { isLoading }] = useLoginUserMutation();
+
   const handleOnSubmit = async (e) => {
     e.preventDefault();
+
     try {
-      await login(email, password);
-      navigate("/");
-      // window.location.reload()
-      toast.success("Login Sucessfull")
+      const response = await loginUser({ email, password }).unwrap();
+      dispatch(login(response.data));
+      if (email.trim() === "admin@gmail.com") {
+        navigate("/admin-dashboard");
+      } else {
+        navigate("/");
+      }
     } catch (error) {
-     toast.success("Login Failed")
+      console.log("Error in login", error);
     }
   };
-  const goToRegisterPage=()=>{
-    navigate('/register')
-  }
+  const goToRegisterPage = () => {
+    navigate("/register");
+  };
+  if (isLoading) return <p>Loading...</p>;
   return (
     <form
       onSubmit={handleOnSubmit}
@@ -66,7 +77,8 @@ export default function Login() {
         <label
           htmlFor="remember"
           className="ms-2 text-sm font-medium text-gray-900 dark:text-blue-700 underline"
-        onClick={goToRegisterPage}>
+          onClick={goToRegisterPage}
+        >
           Do you have an account? Register
         </label>
       </div>
@@ -74,7 +86,7 @@ export default function Login() {
         type="submit"
         className="text-white bg-gray-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
       >
-        Submit
+        {isLoading ? "Loading..." : "Submit"}
       </button>
     </form>
   );

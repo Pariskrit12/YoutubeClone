@@ -1,141 +1,255 @@
 import {
   faSave,
+  faShieldHalved,
   faSort,
   faThumbsDown,
   faThumbsUp,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import axios from "axios";
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { formatTimeAgo } from "../util/formatTime.js";
+import React, { useDebugValue, useEffect, useMemo, useState } from "react";
+import { Link, useParams } from "react-router-dom";
 import SubscribeButton from "../components/SubscribeButton";
 import SuggestedVideo from "../components/SuggestedVideo";
 import { useAuth } from "../context/AuthContext";
 import CommentCard from "../components/CommentCard";
 import { useDispatch, useSelector } from "react-redux";
-import { dislikeVideo, likeVideo } from "../store/slice/likeVideo.js";
 import {
+  dislike,
+  like,
+  setInteractionState,
+} from "../store/slice/likeVideo.js";
+import {
+  useDislikeVideoMutation,
   useGetVideoInfoQuery,
+  useLikeVideoMutation,
+  useSaveVideoMutation,
   useSuggestedVideosQuery,
+  useUnSaveVideoMutation,
 } from "../api/videoApi.js";
 import Spinner from "../components/Spinner.jsx";
+import {
+  useCreateCommentMutation,
+  useGetCommentOfVideoQuery,
+} from "../api/commentApi.js";
+import { useGetChannelInfoQuery } from "../api/channelApi.js";
+import { setSubscriptionState } from "../store/slice/toggleSubscription.js";
+import { setCommentInteractionState } from "../store/slice/likeComment.js";
 
 export default function WatchVideoPage() {
   const { videoId } = useParams();
+  const { data, isLoading } = useGetVideoInfoQuery(videoId);
+
+  const vidData=data?.data?.video;
+
+
+  
+  const videoData = data?.data?.video;
+  const isLikedBackend = data?.data?.isLiked;
+  const isDislikedBackend = data?.data?.isDisliked;
+  const channelId = videoData?.channel?._id;
+
+  const { data: channelData, isLoading: channelInfoLoading } =
+    useGetChannelInfoQuery(channelId);
+
+  const isSubscribedBackend = channelData?.data?.isSubscribed;
+  const subCountsBackend = channelData?.data?.subCount;
 
   const [showDescription, setShowDescription] = useState(false);
+  const { user, refreshUser } = useAuth();
+  const authUser = useSelector((state) => state.auth.user);
+  const userId = authUser?.user?._id;
 
-  const { user } = useAuth();
-  const [comment, setComment] = useState("");
-  const [comments, setComments] = useState([]); // list of fetched comments
+  const userFromAuth = authUser?.user;
+
+  const [content, setContent] = useState("");
+  const [fetchedComments, setFetchedComments] = useState([]);
   const dispatch = useDispatch();
-  const liked = useSelector((state) => state.likes.likedVideos[videoId]);
-  const disliked = useSelector((state) => state.likes.dislikedVideos[videoId]);
-  const dislikeCount = useSelector(
-    (state) => state.likes.dislikeCounts[videoId]
-  );
-  const likeCount = useSelector((state) => state.likes.likeCounts[videoId]);
 
-  const { data, isLoading } = useGetVideoInfoQuery(videoId);
-  const videos = data?.data;
-  const channelId = videos?.channel?._id;
+  // Sync like/dislike info to Redux from backend (after login / refresh)
+  useEffect(() => {
+    if (videoData && videoId) {
+      dispatch(
+        setInteractionState({
+          videoId,
+          isLiked: isLikedBackend,
+          isDisliked: isDislikedBackend,
+          likeCount: videoData?.likes?.length || 0,
+          dislikeCount: videoData?.dislikes?.length || 0,
+        })
+      );
+    }
+  }, [videoData, videoId, isLikedBackend, isDislikedBackend, dispatch]);
+
+  useEffect(() => {
+    if (channelData && channelId) {
+      dispatch(
+        setSubscriptionState({
+          channelId,
+          isSubscribed: isSubscribedBackend,
+          subCount: subCountsBackend,
+        })
+      );
+    }
+  }, [channelData, channelId, isSubscribedBackend, subCountsBackend, dispatch]);
+
+  // Likes
+  const likeCount = useSelector((state) => state.videoInteraction.likeCounts);
+  const likeCountOfVideo = likeCount[videoId] || 0;
+  const isLiked = useSelector(
+    (state) => !!state.videoInteraction.likedVideo[videoId]
+  );
+
+  // Dislikes
+  const dislikeCount = useSelector(
+    (state) => state.videoInteraction.dislikeCounts
+  );
+  const dislikeCountOfVideo = dislikeCount[videoId] || 0;
+  const isDisliked = useSelector(
+    (state) => !!state.videoInteraction.dislikedVideo[videoId]
+  );
+
+  const subscriberCount = useSelector(
+    (state) => state.sub?.subCounts?.[channelId]
+  );
 
   const { data: suggestedVideo, isLoading: suggestedVideoLoading } =
     useSuggestedVideosQuery(videoId);
   const suggestedVideos = suggestedVideo?.data;
 
-  const createdAt = new Date(videos?.createdAt);
-  const now = new Date();
-  const differenceInMilliseconds = now - createdAt;
-  let timeAgo;
-  if (differenceInMilliseconds < 60 * 1000) {
-    timeAgo = `${Math.floor(differenceInMilliseconds / 1000)} seconds ago`;
-  } else if (differenceInMilliseconds < 60 * 60 * 1000) {
-    timeAgo = `${Math.floor(
-      differenceInMilliseconds / (1000 * 60)
-    )} minutes ago`;
-  } else if (differenceInMilliseconds < 24 * 60 * 60 * 1000) {
-    timeAgo = `${Math.floor(
-      differenceInMilliseconds / (1000 * 60 * 60)
-    )} hours ago`;
-  } else {
-    timeAgo = `${Math.floor(
-      differenceInMilliseconds / (1000 * 60 * 60 * 24)
-    )} days ago`;
-  }
-
-  const handleOnLike = () => {
-    dispatch(likeVideo(videoId));
-  };
-
-  const handleOnDislike = async () => {
-    dispatch(dislikeVideo(videoId));
-  };
-
+  const [saveVideo, { isLoading: saveVideoLoading }] = useSaveVideoMutation();
   const handleOnSave = async () => {
-    const response = await axios.post(
-      `/api/v1/videos/save-video/${videoId}`,
-      {},
-      { withCredentials: true }
-    );
-    console.log(response.data);
-  };
-
-  const createComment = async (e) => {
-    e.preventDefault();
-
     try {
-      const formData = new FormData();
-      formData.append("comment", comment);
-      await axios.post(
-        `/api/v1/comments/create-comment/${videoId}`,
-        { content: comment },
-        { withCredentials: true }
-      );
-
-      setComment("");
+      await saveVideo(videoId);
+      await refreshUser();
     } catch (error) {
-      console.log("Failed to create comment", error);
+      console.log("Failed to save video");
     }
   };
 
-  useEffect(() => {
-    const fetchComments = async () => {
-      try {
-        const response = await axios.get(
-          `/api/v1/comments/get-comment-video/${videoId}`,
-          { withCredentials: true }
-        );
-        setComments(response.data.data);
-        console.log(response.data.data);
-      } catch (error) {
-        console.log("Failed to fetch comments", error);
-      }
-    };
-    fetchComments();
-  }, [videoId]);
+  const alreadySaved = useMemo(() => {
+    return user?.savedVideos.some(
+      (video) => video._id.toString() === videoId.toString()
+    );
+  }, [user?.savedVideos, videoId]);
 
-  return isLoading ? (
-    <Spinner />
-  ) : (
-    <div className="w-full  p-[1rem]">
+  const [unSaveVideo, { isLoading: unSaveVideoLoading }] =
+    useUnSaveVideoMutation();
+  const handleOnUnsave = async () => {
+    try {
+      await unSaveVideo(videoId);
+      await refreshUser();
+    } catch (error) {
+      console.log("Failed to unsave video");
+    }
+  };
+
+  const [likeVideo, { isLoading: likeVideoLoading }] = useLikeVideoMutation();
+  const handleOnLike = async () => {
+    dispatch(like(videoId));
+    try {
+      const res = await likeVideo(videoId).unwrap();
+      dispatch(setInteractionState({ videoId, ...res.data }));
+    } catch (error) {
+      console.log("Error in liking video");
+    }
+  };
+
+  const [dislikeVideo, { isLoading: dislikeVideoLoading }] =
+    useDislikeVideoMutation();
+  const handleOnDislike = async () => {
+    dispatch(dislike(videoId));
+    try {
+      const res = await dislikeVideo(videoId).unwrap();
+      dispatch(setInteractionState({ videoId, ...res.data }));
+    } catch (error) {
+      console.log("Error in disliking video");
+    }
+  };
+
+  const [createComment, { isLoading: commentCreationLoading }] =
+    useCreateCommentMutation();
+  const createCommentOnClick = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await createComment({ content, videoId }).unwrap();
+      setContent("");
+      // setFetchedComments((prev) => [response.data, ...prev]);
+      setFetchedComments(response.data)
+    } catch (error) {
+      console.log("Failed to create comment");
+    }
+  };
+
+  const { data: commentsData, isLoading: commentFetchLoading } =
+    useGetCommentOfVideoQuery(videoId);
+
+  const comments = commentsData?.data?.comments;
+
+  //sync redux state with backend when user refresh/login
+  useEffect(() => {
+    if (Array.isArray(comments)) {
+      comments.forEach((comment) => {
+        const likes = comment.likes;
+        const dislikes = comment.dislikes;
+        const commentIsLiked = likes.includes(userId);
+        const commentIsDisliked = dislikes.includes(userId);
+        const commentLikeCount = likes.length;
+        const commentDislikeCount = dislikes.length;
+        const commentId = comment._id;
+
+        dispatch(
+          setCommentInteractionState({
+            commentId,
+            isLiked:commentIsLiked,
+             isDisliked:commentIsDisliked,
+              likeCount:commentLikeCount,
+               dislikeCount:commentDislikeCount
+            
+          })
+        );
+      });
+    }
+  },[comments,userId,dispatch]);
+
+  useEffect(() => {
+    setFetchedComments(comments);
+  }, [comments]);
+
+  if (isLoading) return <Spinner />;
+
+  return (
+    <div className="w-full p-[1rem]">
       <div className="flex gap-[1rem]">
-        <div className="  w-[50rem] flex flex-col ">
-          <div className="border-[1px] rounded-2xl h-[25rem] mb-[10px]"></div>
-          <div className="mb-[1rem] text-xl font-semibold">{videos?.title}</div>
+        <div className="w-[50rem] flex flex-col">
+          <div className="border-[1px] rounded-2xl h-[25rem] mb-[10px]">
+           <video
+        controls
+        className="border-[1px] rounded-2xl h-[25rem] mb-[10px] w-full object-cover"
+        src={videoData?.video}
+        poster={videoData?.thumbnail}
+      >
+        Your browser does not support the video tag.
+      </video>
+          </div>
+          <div className="mb-[1rem] text-xl font-semibold">
+            {videoData?.title}
+          </div>
           <div className="flex justify-between mb-[1rem]">
-            <div className="flex  w-[18rem] items-center justify-between ">
+            <div className="flex w-[18rem] items-center justify-between">
               <div className="flex gap-[5px]">
                 <img
                   className="w-12 h-12 rounded-full"
-                  src={videos?.channel?.avatar}
-                  alt="Rounded avatar"
-                ></img>
+                  src={channelData?.data?.channel?.avatar}
+                  alt="avatar"
+                />
                 <div className="flex flex-col">
-                  <p className="font-semibold">
-                    {videos?.channel?.channelName}
-                  </p>
-                  <p>{videos?.channel?.subscribers.length} subscribers</p>
+                  <Link to={`/channel/${videoData?.channel?._id}`}>
+                    <p className="font-semibold cursor-pointer">
+                      {videoData?.channel?.channelName}
+                    </p>
+                  </Link>
+                  <p>{subscriberCount} subscribers</p>
                 </div>
               </div>
               <div>
@@ -143,41 +257,73 @@ export default function WatchVideoPage() {
               </div>
             </div>
 
-            <div className="flex  gap-[2rem] cursor-pointer text-white">
+            <div className="flex gap-[2rem] cursor-pointer text-white">
               <div
-                className={`flex items-center gap-[5px] text-xl font-semibold  rounded-2xl hover:bg-gray-500 p-[0.5rem] w-auto ${
-                  liked ? `bg-blue-600` : ` bg-gray-700 `
-                } justify-between`}
+                className={`flex items-center gap-[5px] text-xl font-semibold rounded-2xl hover:bg-gray-500 p-[0.5rem] w-auto ${
+                  isLiked ? `bg-blue-600` : `bg-gray-700`
+                }`}
                 onClick={handleOnLike}
               >
-                <p>{likeCount}</p>
-                <FontAwesomeIcon icon={faThumbsUp} />
+                {likeVideoLoading ? (
+                  <span>...</span>
+                ) : (
+                  <>
+                    <p>{likeCountOfVideo}</p>
+                    <FontAwesomeIcon icon={faThumbsUp} />
+                  </>
+                )}
               </div>
+
               <div
-                className={`flex items-center gap-[5px]  text-xl font-semibold  rounded-2xl hover:bg-gray-500 p-[0.5rem] w-auto   justify-between ${
-                  disliked ? `bg-blue-600` : `bg-gray-700`
+                className={`flex items-center gap-[5px] text-xl font-semibold rounded-2xl hover:bg-gray-500 p-[0.5rem] w-auto ${
+                  isDisliked ? `bg-blue-600` : `bg-gray-700`
                 }`}
                 onClick={handleOnDislike}
               >
-                <p>{dislikeCount}</p>
-                <FontAwesomeIcon icon={faThumbsDown} />
+                {dislikeVideoLoading ? (
+                  <span>...</span>
+                ) : (
+                  <>
+                    <p>{dislikeCountOfVideo}</p>
+                    <FontAwesomeIcon icon={faThumbsDown} />
+                  </>
+                )}
               </div>
-              <div
-                onClick={handleOnSave}
-                className="flex text-xl font-semibold   rounded-2xl hover:bg-gray-500 p-[1rem]   bg-gray-700 justify-between"
-              >
-                <FontAwesomeIcon icon={faSave} />
-              </div>
+
+              {alreadySaved ? (
+                <div
+                  onClick={handleOnUnsave}
+                  className="flex text-xl font-semibold rounded-2xl hover:bg-gray-500 p-[1rem] bg-gray-700"
+                >
+                  {unSaveVideoLoading ? (
+                    <Spinner />
+                  ) : (
+                    <FontAwesomeIcon icon={faShieldHalved} />
+                  )}
+                </div>
+              ) : (
+                <div
+                  onClick={handleOnSave}
+                  className="flex text-xl font-semibold rounded-2xl hover:bg-gray-500 p-[1rem] bg-gray-700"
+                >
+                  {saveVideoLoading ? (
+                    <Spinner />
+                  ) : (
+                    <FontAwesomeIcon icon={faSave} />
+                  )}
+                </div>
+              )}
             </div>
           </div>
-          <div className=" h-auto rounded-2xl bg-gray-200 p-[1rem] cursor-pointer mb-[2rem]">
+
+          <div className="h-auto rounded-2xl bg-gray-200 p-[1rem] cursor-pointer mb-[2rem]">
             <div className="flex items-center gap-[1rem] font-semibold text-xl">
-              <p>{videos?.views} views</p>
-              <p>{timeAgo}</p>
+              <p>{videoData?.views} views</p>
+              <p>{formatTimeAgo(videoData?.createdAt)}</p>
             </div>
             {showDescription ? (
               <>
-                <div>{videos.description}</div>
+                <div>{videoData.description}</div>
                 <p
                   className="font-semibold"
                   onClick={() => setShowDescription(false)}
@@ -187,63 +333,69 @@ export default function WatchVideoPage() {
               </>
             ) : (
               <div onClick={() => setShowDescription(true)}>
-                {videos?.description?.length > 20
-                  ? videos.description.slice(0, 20) + " ..See More"
-                  : videos.description}
+                {videoData?.description?.length > 20
+                  ? videoData?.description?.slice(0, 20) + " ..See More"
+                  : videoData?.description}
               </div>
             )}
           </div>
-          <div className="">
+
+          <div>
             <div className="flex items-center gap-[2rem] mb-[1rem]">
-              <p>{videos?.comments?.length} Comments</p>
+              <p>{videoData?.comments?.length} Comments</p>
               <div className="flex items-center gap-[1rem]">
                 <FontAwesomeIcon icon={faSort} />
                 Sort By
               </div>
             </div>
+
             <div className="flex items-center gap-[1rem] mb-[1rem]">
               <img
                 className="w-12 h-12 border-[1px] rounded-full"
-                src={user?.avatar}
-                alt="Rounded avatar"
-              ></img>
-              <form onSubmit={createComment}>
-                <div>
-                  <input
-                    id="comment"
-                    value={comment}
-                    onChange={(e) => setComment(e.target.value)}
-                    placeholder="Comment"
-                    className="border-b-[1px] w-[45rem] focus:outline-none focus:ring-0"
-                  />
-                </div>
+                src={userFromAuth?.avatar}
+                alt="avatar"
+              />
+              <form onSubmit={createCommentOnClick}>
+                <input
+                  id="comment"
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  placeholder={
+                    commentCreationLoading ? "Loading..." : "Comment"
+                  }
+                  className="border-b-[1px] w-[45rem] focus:outline-none focus:ring-0"
+                />
               </form>
             </div>
-            {comments.length > 0 ? (
-              <div className="  ">
-                {comments.map((comment) => (
+
+            <div>
+              {commentFetchLoading ? (
+                <Spinner />
+              ) : Array.isArray(fetchedComments) &&
+                fetchedComments.length > 0 ? (
+                fetchedComments.map((comment) => (
                   <CommentCard
-                    comment={comment}
                     key={comment._id}
-                    setComments={setComments}
-                    comments={comments}
+                    comment={comment}
+                    setFetchedComments={setFetchedComments}
+                    comments={fetchedComments}
                   />
-                ))}
-              </div>
-            ) : (
-              <div className=" flex justify-center items-center h-[5rem] text-2xl font-semibold">
-                <p>No comments</p>
-              </div>
-            )}
+                ))
+              ) : (
+                <div className="flex justify-center items-center h-[5rem] text-2xl font-semibold">
+                  <p>No comments</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
-        <div className="border-[1px] rounded-2xl w-[25rem] p-[1rem] bg-gray-900 h-auto ">
+        <div className="border-[1px] rounded-2xl w-[25rem] p-[1rem] bg-gray-900 h-auto">
           {suggestedVideoLoading ? (
             <Spinner />
           ) : (
             suggestedVideos.map((video) => (
-              <SuggestedVideo video={video} key={video._id} />
+              <SuggestedVideo key={video._id} video={video} />
             ))
           )}
         </div>

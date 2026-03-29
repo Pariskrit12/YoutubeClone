@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { usePostVideoMutation } from "../api/videoApi";
 import { toast } from "react-toastify";
 const FormItem = ({
@@ -50,7 +50,9 @@ export default function PostVideo() {
     setTags(tagArray);
   };
   const [postVideo, { isLoading: postVideoLoading }] = usePostVideoMutation();
-  const channelId = user?.channel?._id;
+  const {channelId }= useParams();
+  console.log(channelId);
+  
   const handleOnSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData();

@@ -19,6 +19,9 @@ export default function Navbar() {
   const navigate = useNavigate();
   const userData = useSelector((state) => state.auth.user);
   const user = userData?.user;
+  
+  console.log(user.channel);
+  
   const isAdmin=useSelector((state)=>state.auth.isAdmin);
 
   const { data, isLoading } = useSearchVideosQuery(query, {
@@ -55,7 +58,7 @@ export default function Navbar() {
     navigate("/create-channel-page");
   };
   const goToPostVideo = () => {
-    navigate("/post-video");
+    navigate(`/post-video/${user.channel}`);
   };
   const goTohomePage = () => {
     navigate("/");
@@ -69,11 +72,8 @@ export default function Navbar() {
           onClick={goTohomePage}
           className="flex items-center cursor-pointer gap-[10px]"
         >
-          <img
-            className="w-[3rem]"
-            src="https://upload.wikimedia.org/wikipedia/commons/e/ef/Youtube_logo.png"
-          />
-          <p className="font-bold">YouTube</p>
+         
+          <p className="font-bold">VideoPlayer</p>
         </div>
         {!isAdmin &&(
 

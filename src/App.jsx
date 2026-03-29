@@ -41,7 +41,7 @@ export default function App() {
           <Route path="/liked" element={<LikedPage />} />
           <Route path="/popular" element={<PopularPage />} />
           <Route path="/subscription" element={<SubscriptionPage />} />
-          <Route path="/post-video" element={<PostVideo />} />
+          <Route path="/post-video/:channelId" element={<PostVideo />} />
           <Route path="/search" element={<SearchResultPage />} />
           <Route path="/video/:videoId" element={<WatchVideoPage />} />
           <Route path="/edit/:channelId" element={<EditPage />} />

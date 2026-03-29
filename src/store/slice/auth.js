@@ -16,8 +16,10 @@ const authSlice = createSlice({
       if(state.role==="admin"){
         state.isAdmin=true;
       }
-      
     },
+    updateUser: (state, action) => {
+  state.user = action.payload;
+},
     logout: (state) => {
       state.isLoggedIn = false;
       state.user = null;
@@ -26,5 +28,5 @@ const authSlice = createSlice({
     },
   },
 });
-export const { login, logout } = authSlice.actions;
+export const { login, logout ,updateUser} = authSlice.actions;
 export default authSlice.reducer;

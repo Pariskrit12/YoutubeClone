@@ -6,9 +6,12 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import { useGetSavedVideoQuery } from "../api/videoApi";
 import Spinner from "../components/Spinner";
+import { useSelector } from "react-redux";
+import { formatTimeAgo } from "../util/formatTime";
 
 export default function ProfilePage() {
-  const { user } = useAuth();
+ const user=useSelector((state)=>state.auth.user)
+console.log(user.user);
 
   let formattedDate = "";
   if (user?.createdAt) {
@@ -19,6 +22,7 @@ export default function ProfilePage() {
       })} ${date.getFullYear()}`;
     }
   }
+  
   const { data, isLoading } = useGetSavedVideoQuery();
   const videos = data?.data;
   return isLoading ? (
@@ -28,16 +32,16 @@ export default function ProfilePage() {
       <div className=" px-[1rem] h-[10rem] flex items-center gap-[1rem]">
         <img
           className="w-[10rem] h-[10rem] rounded-full"
-          src={user?.avatar}
+          src={user?.user?.avatar}
           alt="User avatar"
         ></img>
         <div className="flex flex-col">
-          <p className="text-3xl font-extrabold">{user?.name}</p>
+          <p className="text-3xl font-extrabold">{user?.user?.name}</p>
 
-          <p className=" text-[20px]">{user?.email}</p>
-          <p className="text-[20px]">Joined At: {formattedDate}</p>
-          {user?.channel?._id && (
-            <Link to={`/channel/${user?.channel?._id}`}>
+          <p className=" text-[20px]">{user.user?.email}</p>
+          <p className="text-[20px]">Joined At: {formatTimeAgo(user?.user?.createdAt)}</p>
+          {user?.user?.channel && (
+            <Link to={`/channel/${user.user?.channel}`}>
               <p className="text-[15px] text-blue-700 underline cursor-pointer">
                 View Channel
               </p>

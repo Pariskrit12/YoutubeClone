@@ -9,16 +9,13 @@ import {
   faFire,
   faBolt,
   faDashboard,
-  faVideo,
-  faComment,
-  faUser,
 } from "@fortawesome/free-solid-svg-icons";
 import { useSelector } from "react-redux";
 
 const SidebarItem = ({ icon, label, active, onClick }) => (
   <div
     onClick={onClick}
-    className={` flex flex-col items-center p-3 rounded-xl cursor-pointer transition-all ${
+    className={`flex flex-col items-center p-3 rounded-xl cursor-pointer transition-all ${
       active ? "bg-gray-700 text-white" : "hover:bg-gray-300"
     }`}
   >
@@ -31,13 +28,19 @@ export default function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const isAdmin = useSelector((state) => state.auth.isAdmin);
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+console.log(isAdmin);
+
   let navItems = [];
-  if (isAdmin) {
-    navItems = [
-      { icon: faDashboard, label: "Dashboard", path: "/admin-dashboard" },
-     
-    ];
+
+  if (!isLoggedIn) {
+    // Only show Home if user is logged out
+    navItems = [{ icon: faHouse, label: "Home", path: "/" }];
+  } else if (isAdmin) {
+    // Admin-specific items
+    navItems = [{ icon: faDashboard, label: "Dashboard", path: "/admin-dashboard" }];
   } else {
+    // Logged-in regular user items
     navItems = [
       { icon: faHouse, label: "Home", path: "/" },
       { icon: faClockRotateLeft, label: "History", path: "/history" },

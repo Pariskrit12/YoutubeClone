@@ -44,52 +44,64 @@ const navigate = useNavigate();
   }, []);
 
   return (
-    <div onClick={()=>handleOnClickVideo()} className="cursor-pointer">
-      <div className="xl:w-[20rem] md:w-[14rem] w-[15rem] p-[1rem] ml-[2rem]  mt-[2rem]  rounded-xl border-gray-600">
-        <div className="font-semibold ">
-          <img
-            className="rounded-xl mb-0.5 h-[13rem] w-[25rem] border-[1px] "
-            src={video.thumbnail}
-          />
-          <div className=" flex">
-            <div className="flex items-center gap-[0.5rem] w-[17rem] ">
-              <div className="flex flex-col  mr-[40px]">
-                <div className=" gap-1">
-                  <p>
-                    {video.title.length > 25
-                      ? video.title.slice(0, 25) + "..."
-                      : video.title}
-                  </p>
-                </div>
-                <div className="flex  gap-[1rem]">
-                  <p>{video.views} views</p>
-                  <p>{formatTimeAgo(video.createdAt)}</p>
-                </div>
-              </div>
-            </div>
-            <div className="flex flex-col items-center">
-              {user?.user?.channel === channelId && (
-                <div onClick={() => setDropdown(true)}>
-                  <FontAwesomeIcon
-                    className="cursor-pointer"
-                    icon={faCaretDown}
-                  />
-                </div>
-              )}
-              {dropdown && (
-                <>
-                  <Link to={`/edit-video/${videoId}/${channelId}`}>
-                    <div
-                      ref={dropdownRef}
-                      className="bg-gray-900 text-white w-[3rem] flex justify-center rounded-xl cursor-pointer"
-                    >
-                      <p>Edit</p>
-                    </div>
-                  </Link>
-                </>
-              )}
-            </div>
+    <div
+      onClick={handleOnClickVideo}
+      className="w-full bg-[#0f0f0f] text-white rounded-xl overflow-hidden cursor-pointer hover:bg-[#1a1a1a] transition-colors duration-150"
+    >
+      {/* Thumbnail — 16:9 */}
+      <div className="w-full aspect-video overflow-hidden rounded-xl">
+        <img
+          className="w-full h-full object-cover"
+          src={video.thumbnail}
+          alt={video.title}
+        />
+      </div>
+
+      {/* Info row */}
+      <div className="flex items-start justify-between gap-2 pt-3 pb-4 px-1">
+        {/* Title + meta */}
+        <div className="flex flex-col gap-1 overflow-hidden flex-1">
+          <p className="text-sm font-semibold leading-[1.3] line-clamp-2 text-white">
+            {video.title.length > 25
+              ? video.title.slice(0, 25) + "..."
+              : video.title}
+          </p>
+          <div className="flex items-center gap-2 text-gray-500 text-xs mt-0.5">
+            <span>{video.views} views</span>
+            <span>•</span>
+            <span>{formatTimeAgo(video.createdAt)}</span>
           </div>
+        </div>
+
+        {/* Dropdown trigger + menu */}
+        <div
+          className="flex flex-col items-end flex-shrink-0 relative"
+          ref={dropdownRef}
+        >
+          {user?.user?.channel === channelId && (
+            <div
+              onClick={(e) => {
+                e.stopPropagation();
+                setDropdown(true);
+              }}
+              className="p-1 rounded-md hover:bg-[#2a2a2a] transition-colors"
+            >
+              <FontAwesomeIcon
+                className="cursor-pointer text-gray-400 text-sm"
+                icon={faCaretDown}
+              />
+            </div>
+          )}
+          {dropdown && (
+            <Link
+              to={`/edit-video/${videoId}/${channelId}`}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="absolute top-7 right-0 bg-[#272727] text-white text-xs px-3 py-1.5 rounded-lg shadow-lg cursor-pointer hover:bg-[#3a3a3a] transition-colors z-10">
+                Edit
+              </div>
+            </Link>
+          )}
         </div>
       </div>
     </div>

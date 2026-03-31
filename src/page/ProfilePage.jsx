@@ -28,34 +28,36 @@ console.log(user.user);
   return isLoading ? (
     <Spinner />
   ) : (
-    <div className=" w-full py-[3rem]">
-      <div className=" px-[1rem] h-[10rem] flex items-center gap-[1rem]">
+    <div className="w-full min-h-screen ">
+      {/* Profile header */}
+      <div className="flex items-center gap-6 px-8 py-8 border-b border-gray-800">
         <img
-          className="w-[10rem] h-[10rem] rounded-full"
+          className="w-24 h-24 rounded-full object-cover flex-shrink-0"
           src={user?.user?.avatar}
           alt="User avatar"
-        ></img>
-        <div className="flex flex-col">
-          <p className="text-3xl font-extrabold">{user?.user?.name}</p>
-
-          <p className=" text-[20px]">{user.user?.email}</p>
-          <p className="text-[20px]">Joined At: {formatTimeAgo(user?.user?.createdAt)}</p>
+        />
+        <div className="flex flex-col gap-1">
+          <p className="text-2xl font-extrabold">{user?.user?.name}</p>
+          <p className="text-gray-400 text-sm">{user.user?.email}</p>
+          <p className="text-gray-500 text-xs">Joined {formatTimeAgo(user?.user?.createdAt)}</p>
           {user?.user?.channel && (
             <Link to={`/channel/${user.user?.channel}`}>
-              <p className="text-[15px] text-blue-700 underline cursor-pointer">
+              <p className="text-blue-400 hover:text-blue-300 underline text-xs font-semibold mt-1 transition-colors">
                 View Channel
               </p>
             </Link>
           )}
         </div>
       </div>
-      <div className="border-b-[1px] text-xl font-semibold border-gray-500 mt-[10px] mb-[1rem]">
-        Saved Videos
-      </div>
-      <div className=" xl:ml-[1rem] grid grid-cols-2 md:grid-cols-3">
-        {videos.map((video) => (
-          <VideoCard video={video} key={video._id} />
-        ))}
+
+      {/* Saved videos */}
+      <div className="px-8 pt-6">
+        <p className="text-base font-semibold  mb-4">Saved Videos</p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          {videos.map((video) => (
+            <VideoCard video={video} key={video._id} />
+          ))}
+        </div>
       </div>
     </div>
   );

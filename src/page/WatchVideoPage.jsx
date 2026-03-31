@@ -1,5 +1,6 @@
 import {
   faSave,
+  faFlag,
   faShieldHalved,
   faSort,
   faThumbsDown,
@@ -27,6 +28,7 @@ import {
   useSaveVideoMutation,
   useSuggestedVideosQuery,
   useUnSaveVideoMutation,
+  useReportVideoMutation,
 } from "../api/videoApi.js";
 import {
   useCreateCommentMutation,
@@ -47,6 +49,8 @@ export default function WatchVideoPage() {
   const [content, setContent] = useState("");
   const [fetchedComments, setFetchedComments] = useState([]);
   const [showDescription, setShowDescription] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportReason, setReportReason] = useState("");
 
   // Fetch video info
   const { data, isLoading } = useGetVideoInfoQuery(videoId);
@@ -101,25 +105,31 @@ export default function WatchVideoPage() {
   }, [channelData, channelId, isSubscribedBackend, subCountsBackend, dispatch]);
 
   // Sync comment likes/dislikes
-  useEffect(() => {
-    if (Array.isArray(comments) && isLoggedIn) {
-      comments.forEach((comment) => {
-        const commentIsLiked = comment.likes.includes(userId);
-        const commentIsDisliked = comment.dislikes.includes(userId);
+useEffect(() => {
+  if (Array.isArray(comments) && isLoggedIn) {
+    comments.forEach((comment) => {
+      const commentIsLiked = comment.likes.includes(userId);
+      const commentIsDisliked = comment.dislikes.includes(userId);
 
-        dispatch(
-          setCommentInteractionState({
-            commentId: comment._id,
-            isLiked: commentIsLiked,
-            isDisliked: commentIsDisliked,
-            likeCount: comment.likes.length,
-            dislikeCount: comment.dislikes.length,
-          })
-        );
-      });
-    }
-    setFetchedComments(comments);
-  }, [comments, userId, dispatch, isLoggedIn]);
+      dispatch(
+        setCommentInteractionState({
+          commentId: comment._id,
+          isLiked: commentIsLiked,
+          isDisliked: commentIsDisliked,
+          likeCount: comment.likes.length,
+          dislikeCount: comment.dislikes.length,
+        })
+      );
+    });
+
+    
+    setFetchedComments((prev) => {
+      
+      if (prev.length !== comments.length) return comments;
+      return prev;
+    });
+  }
+}, [comments, userId, dispatch, isLoggedIn]);
 
   // Redux selectors for likes/dislikes
   const likeCount = useSelector((state) => state.videoInteraction.likeCounts);
@@ -165,16 +175,31 @@ export default function WatchVideoPage() {
     }
   };
 
+  // Report video
+  const [reportVideo] = useReportVideoMutation();
+  const handleReport = async (e) => {
+    e.preventDefault();
+    if (!reportReason.trim()) return;
+    try {
+      await reportVideo({ videoId, reason: reportReason }).unwrap();
+      setReportReason("");
+      setShowReportModal(false);
+    } catch (error) {
+      console.log("Failed to report video");
+    }
+  };
+
   // Save/Unsave video
   const [saveVideo] = useSaveVideoMutation();
   const [unSaveVideo] = useUnSaveVideoMutation();
-  const alreadySaved = useMemo(() => {
-    return isLoggedIn
-      ? authUser?.savedVideos.some(
-          (video) => video._id.toString() === videoId.toString()
-        )
-      : false;
-  }, [authUser, videoId, isLoggedIn]);
+const alreadySaved = useMemo(() => {
+  if (!isLoggedIn) return false;
+
+  const savedVideos = authUser?.savedVideos || [];
+  return savedVideos.some(
+    (video) => video._id.toString() === videoId.toString()
+  );
+}, [authUser, videoId, isLoggedIn]);
 
   const handleOnSave = async () => {
     if (!isLoggedIn) return;
@@ -287,6 +312,14 @@ export default function WatchVideoPage() {
                       <FontAwesomeIcon icon={faSave} />
                     </div>
                   )}
+
+                  <div
+                    onClick={() => setShowReportModal(true)}
+                    className="flex text-xl font-semibold rounded-2xl hover:bg-gray-500 p-[1rem] bg-gray-700"
+                    title="Report video"
+                  >
+                    <FontAwesomeIcon icon={faFlag} />
+                  </div>
                 </>
               )}
             </div>
@@ -366,6 +399,45 @@ export default function WatchVideoPage() {
           )}
         </div>
       </div>
+
+      {/* Report Modal */}
+      {showReportModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+          onClick={() => setShowReportModal(false)}
+        >
+          <div
+            className="bg-[#1a1a1a] text-white rounded-2xl p-6 w-[26rem] shadow-xl flex flex-col gap-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-lg font-bold">Report Video</h2>
+            <form onSubmit={handleReport} className="flex flex-col gap-3">
+              <textarea
+                value={reportReason}
+                onChange={(e) => setReportReason(e.target.value)}
+                placeholder="Describe the reason for reporting..."
+                rows={4}
+                className="bg-[#272727] text-white text-sm placeholder-gray-500 rounded-xl px-4 py-3 resize-none outline-none focus:ring-1 focus:ring-gray-500"
+              />
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowReportModal(false)}
+                  className="px-4 py-2 text-sm rounded-xl bg-[#272727] hover:bg-[#333] transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 text-sm rounded-xl bg-red-600 hover:bg-red-500 font-semibold transition-colors"
+                >
+                  Submit Report
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

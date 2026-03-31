@@ -10,13 +10,14 @@ import { toast } from "react-toastify";
 export default function VideoCard({ video }) {
   const navigate = useNavigate();
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+
   const handleOnClickVideo = async () => {
     try {
       if (isLoggedIn) {
         await axios.post(`/api/v1/videos/watch-video/${video._id}`);
         navigate(`/video/${video._id}`);
       } else {
-        toast.success("You have to Login first");
+        toast.info("You have to login first");
         navigate("/login");
       }
     } catch (error) {
@@ -26,39 +27,42 @@ export default function VideoCard({ video }) {
 
   return (
     <div
-      className="xl:w-[23rem] md:w-[14rem] w-[15rem] p-[1rem] ml-[2rem]  mt-[2rem]  rounded-xl border-gray-600  h-[21rem] hover:bg-gray-200 cursor-pointer"
+      className="w-full bg-[#0f0f0f] text-white rounded-xl overflow-hidden cursor-pointer hover:bg-[#1a1a1a] transition-colors duration-150"
       onClick={handleOnClickVideo}
     >
-      <div className="font-semibold">
+   
+      <div className="w-full aspect-video overflow-hidden rounded-xl">
         <img
-          className="rounded-xl mb-0.5 h-[13rem] w-[25rem] border-[1px] "
-          src={video.thumbnail}
+          className="w-full h-full object-cover"
+          src={video?.thumbnail}
+          alt={video?.title}
         />
-        <div className="flex items-center gap-[0.2rem]">
-          <div>
-            <img
-              className="w-15 h-12 rounded-full"
-              src={video.channel.avatar}
-              alt="Rounded avatar"
-            ></img>
-          </div>
-          <div className="flex flex-col  w-[22rem] h-[6rem]  justify-between ">
-            <div className=" gap-1">
-              <p>
-                {video.title.length > 50
-                  ? video.title.slice(0, 50) + "..."
-                  : video.title}
-              </p>
-            </div>
-            <div className="flex gap-[1rem] items-center">
-              <p>{video.channel.channelName}</p>
+      </div>
 
-              <FontAwesomeIcon icon={faCircleCheck} />
-            </div>
-            <div className="flex  gap-[1rem]">
-              <p>{video.views} views</p>
-              <p>{formatTimeAgo(video?.createdAt)}</p>
-            </div>
+    
+      <div className="flex gap-3 pt-3 pb-4 px-1">
+       
+        <div className="flex-shrink-0 pt-0.5">
+          <img
+            className="w-9 h-9 rounded-full object-cover"
+            src={video?.channel?.avatar}
+            alt={video?.channel?.channelName}
+          />
+        </div>
+
+       
+        <div className="flex flex-col gap-1 overflow-hidden">
+          <p className="text-sm font-semibold leading-[1.3] line-clamp-2 text-white">
+            {video?.title}
+          </p>
+          <div className="flex items-center gap-1 text-gray-400 text-xs mt-0.5">
+            <span className="truncate">{video?.channel?.channelName}</span>
+            <FontAwesomeIcon icon={faCircleCheck} className="text-gray-500 text-[9px] flex-shrink-0" />
+          </div>
+          <div className="flex items-center gap-1 text-gray-500 text-xs">
+            <span>{video.views} views</span>
+            <span>•</span>
+            <span>{formatTimeAgo(video?.createdAt)}</span>
           </div>
         </div>
       </div>

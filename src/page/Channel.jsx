@@ -28,47 +28,53 @@ console.log(user);
   return isLoading ? (
     <Spinner />
   ) : (
-    <div className=" w-full py-[3rem]">
-      <div className="px-[3rem] mb-[1rem]">
+    <div className="w-full min-h-screen ">
+      {/* Banner */}
+      <div className="w-full px-6 pt-6">
         <img
-          className="w-[70rem] h-[10rem] rounded-2xl  border-[1px] border-gray-500"
+          className="w-full h-[12rem] object-cover rounded-2xl"
           src={channel?.channel?.banner}
-          alt="User avatar"
-        ></img>
+          alt="Channel banner"
+        />
       </div>
-      <div className="flex  items-center">
-        <div className=" px-[1rem] h-[10rem] flex items-center gap-[1rem]">
-          <img
-            className="w-[10rem] h-[10rem] rounded-full"
-            src={channel.channel?.avatar}
-            alt="User avatar"
-          ></img>
-        </div>
-        <div>
-          <div className="flex items-center gap-[1rem]">
-            <p className="text-3xl font-extrabold">{channel?.channel?.channelName}</p>
-            <FontAwesomeIcon className="text-2xl" icon={faCircleCheck} />
-          </div>
-          <p className="font-semibold text-[20px]">
-            Channel Created At: {formatTimeAgo(channel?.channel?.createdAt)}
-          </p>
 
-          {user?.channel?._id !== channelId ? (
-            <SubscribeButton channelId={channelId} />
-          ) : (
-            <Link to={`/edit/${channelId}`}>
-            <p className="text-blue-700 underline text-xl font-semibold">Edit</p>
-            </Link>
-          )}
+      {/* Profile section */}
+      <div className="flex items-center gap-5 px-8 py-6 border-b border-gray-800">
+        <img
+          className="w-24 h-24 rounded-full object-cover flex-shrink-0"
+          src={channel.channel?.avatar}
+          alt="Channel avatar"
+        />
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-2">
+            <p className="text-2xl font-extrabold">{channel?.channel?.channelName}</p>
+            <FontAwesomeIcon className="text-gray-400 text-lg" icon={faCircleCheck} />
+          </div>
+          <p className="text-gray-400 text-sm">
+            Created {formatTimeAgo(channel?.channel?.createdAt)}
+          </p>
+          <div className="mt-2">
+            {user?.channel?._id !== channelId ? (
+              <SubscribeButton channelId={channelId} />
+            ) : (
+              <Link to={`/edit/${channelId}`}>
+                <p className="text-blue-400 hover:text-blue-300 underline text-sm font-semibold transition-colors">
+                  Edit channel
+                </p>
+              </Link>
+            )}
+          </div>
         </div>
       </div>
-      <div className="border-b-[1px] text-xl font-semibold border-gray-500 mt-[10px] mb-[1rem] px-[1.5rem]">
-        Posts
-      </div>
-      <div className=" xl:ml-[1rem] grid grid-cols-2 md:grid-cols-3">
-        {videos.map((video) => (
-          <UploadVideo video={video} key={video._id} channelId={channelId}/>
-        ))}
+
+      {/* Videos section */}
+      <div className="px-8 pt-6">
+        <p className="text-base font-semibold  mb-4">Videos</p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          {videos.map((video) => (
+            <UploadVideo video={video} key={video._id} channelId={channelId} />
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -91,6 +91,13 @@ export const videoApi = baseApi.injectEndpoints({
     getRecommendations: builder.query({
       query: () => "api/v1/videos/recommendations",
     }),
+    reportVideo: builder.mutation({
+  query: ({ videoId, reason }) => ({
+    url: `/api/v1/videos/report/${videoId}`,
+    method: "POST",
+    body: { reason },
+  }),
+}),
   }),
 });
 export const {
@@ -111,5 +118,6 @@ export const {
   useDeleteVideoMutation,
   useLikeVideoMutation,
   useDislikeVideoMutation,
-  useGetRecommendationsQuery
+  useGetRecommendationsQuery,
+  useReportVideoMutation
 } = videoApi;

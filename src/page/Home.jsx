@@ -23,7 +23,7 @@ export default function Home() {
   const videosToShow = isLoggedIn ? recommendedData?.data : allVideosData?.data;
 
   return (
-    <div className="xl:ml-[1rem] grid grid-cols-2 md:grid-cols-3 gap-4">
+    <div className="grid grid-cols-3 gap-10  mt-5">
       {videosToShow?.map((video) => (
         <VideoCard key={video._id} video={video} />
       ))}

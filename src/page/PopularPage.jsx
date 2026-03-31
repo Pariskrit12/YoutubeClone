@@ -5,14 +5,13 @@ import React, { useDebugValue, useEffect, useState } from "react";
 import Videoc from "../components/Videoc";
 import { useGetPopularVideosQuery } from "../api/videoApi";
 import Spinner from "../components/Spinner";
+import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 export default function PopularPage() {
   const { data, isLoading, isError } = useGetPopularVideosQuery();
-  console.log(data);
-  
+
   const videos = data?.data?.paginatedPopularVideo;
-  console.log(videos);
-  
 
   return isLoading ? (
     <Spinner />

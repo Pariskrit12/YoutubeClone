@@ -1,21 +1,32 @@
 import VideoCard from "../components/VideoCard";
-import { useGetAllVideosQuery } from "../api/videoApi";
+import { useGetAllVideosQuery, useGetRecommendationsQuery } from "../api/videoApi";
 import Spinner from "../components/Spinner";
 import { useSelector } from "react-redux";
 
 export default function Home() {
-  const isLoggedIn=useSelector((state)=>state.auth.isLoggedIn);
-  const { data, isError, isLoading } = useGetAllVideosQuery();
-  if (isLoading) return <p className="text-white">Loading...</p>;
-  if (isError) return <p className="text-red-500">Error fetching videos.</p>;
-  const videos = data?.data;
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  const user = useSelector((state) => state.auth.user);
 
-  return isLoading ? (
-    <Spinner />
-  ) : (
-    <div className=" xl:ml-[1rem] grid grid-cols-2 md:grid-cols-3 ">
-      {Array.isArray(videos) &&
-        videos?.map((video) => <VideoCard video={video} key={video._id} />)}
+  // Fetch recommended videos only if logged in
+  const { data: recommendedData, isLoading: recommendedLoading, isError: recommendedError } =
+    useGetRecommendationsQuery(undefined, { skip: !isLoggedIn });
+
+  // Always fetch all public videos
+  const { data: allVideosData, isLoading: allVideosLoading, isError: allVideosError } =
+    useGetAllVideosQuery();
+
+  if (allVideosLoading || (isLoggedIn && recommendedLoading)) return <Spinner />;
+
+  if (allVideosError) return <p className="text-red-500">Error fetching videos.</p>;
+  if (recommendedError) console.log("Error fetching recommendations");
+  
+  const videosToShow = isLoggedIn ? recommendedData?.data : allVideosData?.data;
+
+  return (
+    <div className="xl:ml-[1rem] grid grid-cols-2 md:grid-cols-3 gap-4">
+      {videosToShow?.map((video) => (
+        <VideoCard key={video._id} video={video} />
+      ))}
     </div>
   );
 }

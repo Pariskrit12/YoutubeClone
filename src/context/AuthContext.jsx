@@ -3,17 +3,19 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { useGetPersonalInfoQuery } from "../api/userApi";
 import Spinner from "../components/Spinner";
+import { useSelector } from "react-redux";
 const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
+  const userLogged=useSelector((state)=>state.auth.user);
   const {
     data,
     error,
     isLoading: userInfoLoading,
     refetch,
-  } = useGetPersonalInfoQuery();
+  } = useGetPersonalInfoQuery(undefined,{skip:!userLogged});
   const [user, setUser] = useState(null);
   
   useEffect(() => {

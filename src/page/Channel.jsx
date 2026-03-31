@@ -17,6 +17,8 @@ console.log(user);
   const { data: channelInfo, isLoading: channelInfoLoading } =
     useGetChannelInfoQuery(channelId);
   const channel = channelInfo?.data;
+  console.log(channel);
+  
 
   const { data: channelVideos, isLoading } = useGetChannelVideoQuery(channelId);
 
@@ -30,7 +32,7 @@ console.log(user);
       <div className="px-[3rem] mb-[1rem]">
         <img
           className="w-[70rem] h-[10rem] rounded-2xl  border-[1px] border-gray-500"
-          src={channel?.banner}
+          src={channel?.channel?.banner}
           alt="User avatar"
         ></img>
       </div>
@@ -38,17 +40,17 @@ console.log(user);
         <div className=" px-[1rem] h-[10rem] flex items-center gap-[1rem]">
           <img
             className="w-[10rem] h-[10rem] rounded-full"
-            src={channel?.avatar}
+            src={channel.channel?.avatar}
             alt="User avatar"
           ></img>
         </div>
         <div>
           <div className="flex items-center gap-[1rem]">
-            <p className="text-3xl font-extrabold">{channel?.channelName}</p>
+            <p className="text-3xl font-extrabold">{channel?.channel?.channelName}</p>
             <FontAwesomeIcon className="text-2xl" icon={faCircleCheck} />
           </div>
           <p className="font-semibold text-[20px]">
-            Channel Created At: {formatTimeAgo(channel?.createdAt)}
+            Channel Created At: {formatTimeAgo(channel?.channel?.createdAt)}
           </p>
 
           {user?.channel?._id !== channelId ? (

@@ -7,7 +7,7 @@ export const videoApi = baseApi.injectEndpoints({
     }),
     getLikedVideo: builder.query({
       query: () => "api/v1/videos/get-liked-video",
-      providesTags:["video"]
+      providesTags: ["video"],
     }),
 
     getPopularVideos: builder.query({
@@ -80,13 +80,16 @@ export const videoApi = baseApi.injectEndpoints({
         url: `api/v1/likes/like-video/${videoId}`,
         method: "POST",
       }),
-      invalidatesTags:["video"]
+      invalidatesTags: ["video"],
     }),
     dislikeVideo: builder.mutation({
       query: (videoId) => ({
         url: `api/v1/likes/dislike-video/${videoId}`,
         method: "POST",
       }),
+    }),
+    getRecommendations: builder.query({
+      query: () => "api/v1/videos/recommendations",
     }),
   }),
 });
@@ -107,5 +110,6 @@ export const {
   useUpdateVideoThumbnailMutation,
   useDeleteVideoMutation,
   useLikeVideoMutation,
-  useDislikeVideoMutation
+  useDislikeVideoMutation,
+  useGetRecommendationsQuery
 } = videoApi;

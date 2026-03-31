@@ -4,27 +4,47 @@ import React, { use, useEffect, useRef, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { formatTimeAgo } from "../util/formatTime";
 import { Link, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import axios from "axios";
 
 export default function UploadVideo({ video, channelId }) {
-  const {user}=useAuth();
-  const[dropdown,setDropdown]=useState(false);
-  const dropdownRef=useRef();
-  const videoId=video._id
- 
- useEffect(() => {
-     const handleClickOutside = (event) => {
-       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-         setDropdown(false);
-       }
-     };
-     document.addEventListener("mousedown", handleClickOutside);
-     return () => {
-       document.removeEventListener("mousedown", handleClickOutside);
-     };
-   }, []);
+  const user = useSelector((state) => state.auth.user);
+  const [dropdown, setDropdown] = useState(false);
+  const dropdownRef = useRef();
+  const videoId = video._id;
+
   
+
+const navigate = useNavigate();
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  const handleOnClickVideo = async () => {
+    try {
+      if (isLoggedIn) {
+        await axios.post(`/api/v1/videos/watch-video/${video._id}`);
+        navigate(`/video/${video._id}`);
+      } else {
+        toast.success("You have to Login first");
+        navigate("/login");
+      }
+    } catch (error) {
+      console.log("Failed to watch video", error);
+    }
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
-    <div>
+    <div onClick={()=>handleOnClickVideo()} className="cursor-pointer">
       <div className="xl:w-[20rem] md:w-[14rem] w-[15rem] p-[1rem] ml-[2rem]  mt-[2rem]  rounded-xl border-gray-600">
         <div className="font-semibold ">
           <img
@@ -48,24 +68,26 @@ export default function UploadVideo({ video, channelId }) {
               </div>
             </div>
             <div className="flex flex-col items-center">
-
-            {user.channel?._id === channelId && (
-              <div onClick={()=>setDropdown(true)}>
-                <FontAwesomeIcon
-                  className="cursor-pointer"
-                  icon={faCaretDown}
-                />
-              </div>
-            )}
-            {dropdown && (
-             <>
-             <Link to={`/edit-video/${videoId}/${channelId}`}>
-             <div ref={dropdownRef} className="bg-gray-900 text-white w-[3rem] flex justify-center rounded-xl cursor-pointer">
-              <p>Edit</p>
-             </div>
-             </Link>
-             </>
-            )}
+              {user?.user?.channel === channelId && (
+                <div onClick={() => setDropdown(true)}>
+                  <FontAwesomeIcon
+                    className="cursor-pointer"
+                    icon={faCaretDown}
+                  />
+                </div>
+              )}
+              {dropdown && (
+                <>
+                  <Link to={`/edit-video/${videoId}/${channelId}`}>
+                    <div
+                      ref={dropdownRef}
+                      className="bg-gray-900 text-white w-[3rem] flex justify-center rounded-xl cursor-pointer"
+                    >
+                      <p>Edit</p>
+                    </div>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>

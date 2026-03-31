@@ -15,6 +15,8 @@ export default function Dropdown({ closeDropdown }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  const user = useSelector((state) => state.auth.user);
+
 
   const [logoutUser, { isLoading: logoutLoading }] = useLogoutUserMutation();
   const handleOnLogoutClick = async () => {
@@ -34,7 +36,7 @@ export default function Dropdown({ closeDropdown }) {
   };
 
   const goToProfile = () => {
-    navigate(`/profile/${user._id}`);
+    navigate(`/profile/${user?.user?._id}`);
     closeDropdown();
   };
   if (logoutLoading) return <p>Loading...</p>;

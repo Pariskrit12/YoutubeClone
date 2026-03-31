@@ -20,7 +20,7 @@ export default function Navbar() {
   const userData = useSelector((state) => state.auth.user);
   const user = userData?.user;
   
-  console.log(user.channel);
+
   
   const isAdmin=useSelector((state)=>state.auth.isAdmin);
 
